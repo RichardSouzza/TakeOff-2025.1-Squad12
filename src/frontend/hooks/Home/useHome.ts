@@ -33,8 +33,6 @@ export const useHome = () => {
 
         toastMessage("Login realizado com sucesso", "success");
 
-
-      // Aguarda um pouco antes de redirecionar
       setTimeout(() => {
         router.push("/dashboards");
       }, 1500);
