@@ -1,7 +1,7 @@
 from os import getenv
 
-import pymssql
 from dotenv import load_dotenv
+import pymssql
 
 
 load_dotenv()

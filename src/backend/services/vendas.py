@@ -1,12 +1,41 @@
 from datetime import date
 
-from core import cursor
+from infra import cursor
 
 
 class VendasService:
     def getFiliais(self):
         query = "SELECT DISTINCT nmFilial as Nome FROM dbproinfo.dbo.tbVendasDashboard;"
         cursor.execute(query)
+        return list(cursor)
+
+    def getVendasDia(self, data):
+        query = """
+            SELECT 
+                SUM(vlVenda) AS VendasTotaisDia
+            FROM 
+                dbproinfo.dbo.tbVendasDashboard
+            WHERE 
+                dtVenda = %s;
+        """
+
+        cursor.execute(query, data)
+
+        return list(cursor)
+    
+    def getVendasMes(self, data):
+        query = """
+            SELECT 
+                SUM(vlVenda) AS VendasTotaisMes
+            FROM 
+                dbproinfo.dbo.tbVendasDashboard
+            WHERE 
+                YEAR(dtVenda) = YEAR(%s)
+                AND MONTH(dtVenda) = MONTH(%s);
+        """
+
+        cursor.execute(query, (data, data))
+
         return list(cursor)
 
     def getVendasAcumuladas(self, data):
@@ -60,7 +89,7 @@ class VendasService:
                 v25.Mes;
         """
 
-        cursor.execute(query, filial, data)
+        cursor.execute(query, (filial, data))
         
         data = [row for row in cursor]
 

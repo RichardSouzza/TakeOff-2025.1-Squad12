@@ -17,6 +17,18 @@ def getFiliais():
     return {"data": filiais}
 
 
+@app.get("/vendasDia", summary="Obter vendas totais de um determinado dia")
+def get_vendas_dia(data: date):
+    result = vendasService.getVendasDia(data)
+    return {"data": result}
+
+
+@app.get("/vendasMes", summary="Obter vendas totais de um determinado mês")
+def get_vendas_mes(data: date):
+    result = vendasService.getVendasMes(data)
+    return {"data": result}
+
+
 @app.get("/vendasAcumuladas", summary="Obter vendas acumuladas até determinada data")
 def getVendasAcumuladas(data: date):
     result = vendasService.getVendasAcumuladas(data)
