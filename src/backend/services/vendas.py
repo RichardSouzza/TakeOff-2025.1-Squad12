@@ -1,6 +1,6 @@
 from datetime import date
 
-from core import cursor
+from infra import cursor
 
 
 class VendasService:
@@ -65,4 +65,3 @@ class VendasService:
         data = [row for row in cursor]
 
         return data
-
