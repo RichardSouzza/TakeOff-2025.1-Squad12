@@ -9,6 +9,35 @@ class VendasService:
         cursor.execute(query)
         return list(cursor)
 
+    def getVendasDia(self, data):
+        query = """
+            SELECT 
+                SUM(vlVenda) AS VendasTotaisDia
+            FROM 
+                dbproinfo.dbo.tbVendasDashboard
+            WHERE 
+                dtVenda = %s;
+        """
+
+        cursor.execute(query, data)
+
+        return list(cursor)
+    
+    def getVendasMes(self, data):
+        query = """
+            SELECT 
+                SUM(vlVenda) AS VendasTotaisMes
+            FROM 
+                dbproinfo.dbo.tbVendasDashboard
+            WHERE 
+                YEAR(dtVenda) = YEAR(%s)
+                AND MONTH(dtVenda) = MONTH(%s);
+        """
+
+        cursor.execute(query, (data, data))
+
+        return list(cursor)
+
     def getVendasAcumuladas(self, data):
         query = """
             SELECT 
@@ -65,3 +94,4 @@ class VendasService:
         data = [row for row in cursor]
 
         return data
+
