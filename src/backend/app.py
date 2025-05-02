@@ -12,31 +12,43 @@ vendasService = VendasService()
 
 
 @app.get("/filiais", summary="Obter todas as filiais")
-def getFiliais():
-    filiais = vendasService.getFiliais()
+def get_filiais():
+    filiais = vendasService.get_filiais()
     return {"data": filiais}
 
 
-@app.get("/vendasDia", summary="Obter vendas totais de um determinado dia")
-def get_vendas_dia(data: date):
-    result = vendasService.getVendasDia(data)
+@app.get("/vendasDiaFilial", summary="Obter vendas totais de uma filial em determinado dia")
+def get_vendas_dia(data: date, filial: str = ""):
+    result = vendasService.get_vendas_dia(data, filial)
     return {"data": result}
 
 
-@app.get("/vendasMes", summary="Obter vendas totais de um determinado mês")
-def get_vendas_mes(data: date):
-    result = vendasService.getVendasMes(data)
+@app.get("/vendasMesFilial", summary="Obter vendas totais de uma filial em determinado mês")
+def get_vendas_mes(data: date, filial: str = ""):
+    result = vendasService.get_vendas_mes(data, filial)
     return {"data": result}
 
 
-@app.get("/vendasAcumuladas", summary="Obter vendas acumuladas até determinada data")
-def getVendasAcumuladas(data: date):
-    result = vendasService.getVendasAcumuladas(data)
+@app.get("/vendasAcumuladasMes", summary="Obter vendas acumuladas de um mês até determinada data")
+def get_vendas_acumuladas_mes(data: date):
+    result = vendasService.get_vendas_acumuladas_mes(data)
+    return {"data": result}
+
+
+@app.get("/vendasAcumuladasAno", summary="Obter vendas acumuladas de um ano até determinada data")
+def get_vendas_acumuladas_ano(data: date):
+    result = vendasService.get_vendas_acumuladas_ano(data)
+    return {"data": result}
+
+
+@app.get("/vendasTotaisAnoFilial", summary="Obter vendas totais de uma filial em determinado ano")
+def get_vendas_totais_por_ano_filial(ano: int, filial: str = ""):
+    result = vendasService.get_vendas_totais_por_ano_filial(ano, filial)
     return {"data": result}
 
 
 @app.get("/crescimentoMensalPorFilialData", summary="Obter crescimento mensal por filial e data")
-def getCrescimentoMensalPorFilialData(filial: str, data: date):
-    result = vendasService.getCrescimentoMensalPorFilialData(filial, data)
+def get_crescimento_mensal_por_filial_data(filial: str, data: date):
+    result = vendasService.get_crescimento_mensal_por_filial_data(filial, data)
     return {"data": result}
 

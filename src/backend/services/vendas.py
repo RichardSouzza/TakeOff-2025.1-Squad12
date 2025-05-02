@@ -4,26 +4,28 @@ from infra import cursor
 
 
 class VendasService:
-    def getFiliais(self):
+    def get_filiais(self):
         query = "SELECT DISTINCT nmFilial as Nome FROM dbproinfo.dbo.tbVendasDashboard;"
         cursor.execute(query)
         return list(cursor)
 
-    def getVendasDia(self, data):
+    def get_vendas_dia(self, data, filial):
         query = """
             SELECT 
                 SUM(vlVenda) AS VendasTotaisDia
             FROM 
                 dbproinfo.dbo.tbVendasDashboard
             WHERE 
-                dtVenda = %s;
+                dtVenda = %s
+                AND (%s IS NULL OR nmFilial = %s);
         """
 
-        cursor.execute(query, data)
+        cursor.execute(query, (data, filial, filial))
 
         return list(cursor)
-    
-    def getVendasMes(self, data):
+
+
+    def get_vendas_mes(self, data, filial):
         query = """
             SELECT 
                 SUM(vlVenda) AS VendasTotaisMes
@@ -31,14 +33,32 @@ class VendasService:
                 dbproinfo.dbo.tbVendasDashboard
             WHERE 
                 YEAR(dtVenda) = YEAR(%s)
-                AND MONTH(dtVenda) = MONTH(%s);
+                AND MONTH(dtVenda) = MONTH(%s)
+                AND (%s IS NULL OR nmFilial = %s);
         """
 
-        cursor.execute(query, (data, data))
+        cursor.execute(query, (data, data, filial, filial))
 
         return list(cursor)
 
-    def getVendasAcumuladas(self, data):
+
+    def get_vendas_acumuladas_mes(self, data):
+        first_day = data.replace(day=1)
+
+        query = """
+            SELECT 
+                ISNULL(SUM(vlVenda), 0) AS VendasAcumuladasNoMes
+            FROM 
+                dbproinfo.dbo.tbVendasDashboard
+            WHERE
+                dtVenda BETWEEN %s AND %s;
+        """
+
+        cursor.execute(query, (first_day, data))
+        return list(cursor)
+
+
+    def get_vendas_acumuladas_ano(self, data):
         query = """
             SELECT 
                 SUM(vlVenda) AS VendasAcumuladas
@@ -53,7 +73,24 @@ class VendasService:
  
         return list(cursor)
 
-    def getCrescimentoMensalPorFilialData(self, filial: str, data: date):
+
+    def get_vendas_totais_por_ano_filial(self, ano, filial):
+        query = """
+            SELECT 
+                ISNULL(SUM(vlVenda), 0) AS VendasTotaisAno
+            FROM 
+                dbproinfo.dbo.tbVendasDashboard
+            WHERE 
+                YEAR(dtVenda) = %s
+                AND (%s IS NULL OR nmFilial = %s);
+        """
+
+        cursor.execute(query, (ano, filial, filial))
+
+        return list(cursor)
+
+
+    def get_crescimento_mensal_por_filial_data(self, filial: str, data: date):
         query = """
             WITH VendasMensais AS (
                 SELECT
