@@ -2,18 +2,49 @@
 
 import { Logos } from "@/components/logos";
 import Image from "next/image";
+import axios, { AxiosResponse } from "axios";
 import { IoLogoInstagram } from "react-icons/io";
 import { FaFacebookSquare, FaLinkedin } from "react-icons/fa";
 import { useHome } from "@/hooks/Home/useHome";
 import { SelectInput } from "@/components/selectInput";
 import { BarChartExample } from "@/components/graficoBarra";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ChartConfig } from "@/components/ui/chart";
 import { GraficoProg } from "@/components/graficoProg";
 
 export default function Dashboards() {
   const { errors, handleLogin, handleSubmit, isLoading, register } = useHome();
 
+  const [filiais, setFiliais] = useState<any[]>([]);
+
+  const _axios = axios.create({
+    baseURL: "http://localhost:8000",
+    headers: {"Access-Control-Allow-Origin": "http://localhost:8000"},
+    timeout: 10000,
+  });
+
+
+  useEffect(() => {
+    const validateDataRequest = async () => {
+      try {
+        const response = await _axios.get("/filiais");
+        console.log("Resposta da API:", response.data);
+        setFiliais(response.data.data);
+      } catch (error) {
+        console.log("Erro ao buscar filiais:", error);
+      }
+    };
+  
+    validateDataRequest();
+  }, []);
+
+  const optionsFiliaisTeste = Array.isArray(filiais)
+  ? filiais.map((filial) => ({
+      value: filial.Nome,
+      label: filial.Nome,
+    }))
+  : [];
+  
   const optionsFiliais = [
     { value: 'filial01', label: 'Filial 01' },
     { value: 'filial02', label: 'Filial 02' },
@@ -131,7 +162,14 @@ export default function Dashboards() {
                 <p className="text-[20px]">Análise mensal</p>
               </div>
               <div className="w-[240px]">
-
+              <SelectInput
+                isSearchable={false}
+                options={optionsFiliaisTeste}
+                label="Filiais Teste"
+                onChange={handleFilialChange}
+              />
+            </div>
+              <div className="w-[240px]">
                 <SelectInput
                   isSearchable={false}
                   options={optionsFiliais}
