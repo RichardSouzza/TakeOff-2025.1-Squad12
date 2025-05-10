@@ -1,6 +1,5 @@
 "use client"
 
-import { TrendingUp } from "lucide-react"
 import { CartesianGrid, Line, LineChart, XAxis } from "recharts"
 
 import {
@@ -17,7 +16,18 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
-const chartData = [
+
+
+interface ChartData {
+  month: string;
+  crescimento: string;
+}
+
+interface GraficoProgProps {
+  chartData: Array<ChartData>;
+}
+
+const chartDataEx = [
   { month: "Janeiro", crescimento: 1.4 },
   { month: "Fevereiro", crescimento: 7.89 },
   { month: "Março", crescimento: 3.22 },
@@ -41,7 +51,8 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function GraficoProg() {
+export function GraficoProg({ chartData }: GraficoProgProps) {
+  console.log(chartData);
   return (
     <Card className="flex justify-center">
       <CardHeader>

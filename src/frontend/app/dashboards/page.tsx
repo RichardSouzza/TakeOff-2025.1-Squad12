@@ -2,99 +2,166 @@
 
 import { Logos } from "@/components/logos";
 import Image from "next/image";
+import axios from "axios";
 import { IoLogoInstagram } from "react-icons/io";
 import { FaFacebookSquare, FaLinkedin } from "react-icons/fa";
-import { useHome } from "@/hooks/Home/useHome";
 import { SelectInput } from "@/components/selectInput";
 import { BarChartExample } from "@/components/graficoBarra";
-import { useState } from "react";
-import { ChartConfig } from "@/components/ui/chart";
+import { useEffect, useState } from "react";
 import { GraficoProg } from "@/components/graficoProg";
 
 export default function Dashboards() {
-  const { errors, handleLogin, handleSubmit, isLoading, register } = useHome();
+  const [filiais, setFiliais] = useState<any[]>([]);
+  const [filialG1, setFilialG1] = useState<any>("FILIAL RECIFE");
+  const [filialG2, setFilialG2] = useState<any>("FILIAL RECIFE");
+  
+  const dataAtual = new Date();
+  const anoAtual = dataAtual.getFullYear();
+  const diaAtual = String(dataAtual.getDate()).padStart(2, '0');;
+  const [mes, setMes] = useState<string>("");
+  
+  // Dados dos gráficos 
+  const [vendasAcumuladasMesDoAnoAtual, setVendasAcumuladasMesDoAnoAtual] = useState<number>(0);
+  const [vendasAcumuladasMesDoAnoPassado, setVendasAcumuladasMesDoAnoPassado] = useState<number>(0);
+  const [metaMes, setMetaMes] = useState<number>(0);
+  const [vendasMesAnoPassado, setVendasMesAnoPassado] = useState<number>(0);
+  const [metaVendas, setMetaVendas] = useState<number>(0);
+  const [vendasDataSelecionada, setVendasDataSelecionada] = useState<number>(0);
+  const [crescimento, setCrescimento] = useState<any[]>([]);
 
-  const optionsFiliais = [
-    { value: 'filial01', label: 'Filial 01' },
-    { value: 'filial02', label: 'Filial 02' },
-    { value: 'filial03', label: 'Filial 03' },
+
+  const _axios = axios.create({
+    baseURL: "http://localhost:8000",
+    headers: {"Access-Control-Allow-Origin": "http://localhost:8000"},
+    timeout: 10000,
+  });
+
+
+  useEffect(() => {
+    const validateDataRequest = async () => {
+      try {
+        const response = await _axios.get("/filiais");
+        setFiliais(response.data.data);
+      } catch (error) {
+      }
+    };
+  
+    validateDataRequest();
+
+  }, []);
+
+  const optionsFiliaisTeste = Array.isArray(filiais)
+  ? filiais.map((filial) => ({
+      value: filial.Nome,
+      label: filial.Nome,
+    }))
+  : [];
+
+  const optionsMeses = [
+    {
+      value: '01',
+      label: 'Janeiro',
+    },
+    {
+      value: '02',
+      label: 'Fevereiro',
+    },
+    {
+      value: '03',
+      label: 'Março',
+    },
+    {
+      value: '04',
+      label: 'Abril',
+    },
+    {
+      value: '05',
+      label: 'Maio',
+    },
   ];
-
-  const optionsMes = [
-    { value: 'janeiro', label: 'Janeiro' },
-    { value: 'fevereiro', label: 'Fevereiro' },
-    { value: 'março', label: 'Março' },
-    { value: 'abril', label: 'Abril' },
-    { value: 'maio', label: 'Maio' },
-    { value: 'junho', label: 'Junho' },
-    { value: 'julho', label: 'Julho' },
-    { value: 'agosto', label: 'Agosto' },
-    { value: 'setembro', label: 'Setembro' },
-    { value: 'outubro', label: 'Outubro' },
-    { value: 'novembro', label: 'Novembro' },
-    { value: 'dezembro', label: 'Dezembro' },
-  ];
-
-  // Estado para armazenar a filial selecionada
-  const [selectedFilial, setSelectedFilial] = useState('filial01');
-
-
+  
   // Estado para armazenar os dados do gráfico
   const [chartData, setChartData] = useState([
-    { name: 'Vendas acumuladas 2024', valor: 1000 },
-    { name: 'Vendas acumuladas atual', valor: 800 },
-    { name: 'Meta de Vendas acumuladas', valor: 1200 },
-    { name: 'Vendas 2024', valor: 500 },
-    { name: 'Meta total do mês', valor: 300 },
-    { name: 'Vendas do dia', valor: 50 },
+    { name: `Vendas acumuladas ${anoAtual - 1}`, valor: 0 },
+    { name: 'Vendas acumuladas atual', valor: 0 },
+    { name: 'Meta de Vendas acumuladas', valor: 0 },
+    { name: `Vendas totais do mês em ${anoAtual - 1}`, valor: 0 },
+    { name: 'Meta total do mês', valor: 0 },
   ]);
 
-  // Função para mudar os dados do gráfico conforme a filial
-  const handleFilialChange = (option: any) => {
-    setSelectedFilial(option.value);
+  const setChartData1 = async (mes: string, filial: string) => {
+    const date = `2025-${mes}-${diaAtual}`;
 
-    switch (option.value) {
-      case 'filial01':
-        setChartData([
-          { name: 'Vendas acumuladas 2024', valor: 1000 },
-          { name: 'Vendas acumuladas atual', valor: 800 },
-          { name: 'Meta de Vendas acumuladas', valor: 1200 },
-          { name: 'Vendas 2024', valor: 500 },
-          { name: 'Meta total do mês', valor: 300 },
-          { name: 'Vendas do dia', valor: 50 },
-        ]);
-        break;
-      case 'filial02':
-        setChartData([
-          { name: 'Vendas acumuladas 2024', valor: 1500 },
-          { name: 'Vendas acumuladas atual', valor: 1100 },
-          { name: 'Meta de Vendas acumuladas', valor: 1600 },
-          { name: 'Vendas 2024', valor: 750 },
-          { name: 'Meta total do mês', valor: 500 },
-          { name: 'Vendas do dia', valor: 80 },
-        ]);
-        break;
-      case 'filial03':
-        setChartData([
-          { name: 'Vendas acumuladas 2024', valor: 800 },
-          { name: 'Vendas acumuladas atual', valor: 600 },
-          { name: 'Meta de Vendas acumuladas', valor: 1000 },
-          { name: 'Vendas 2024', valor: 300 },
-          { name: 'Meta total do mês', valor: 400 },
-          { name: 'Vendas do dia', valor: 40 },
-        ]);
-        break;
-      default:
-        setChartData([
-          { name: 'Vendas acumuladas 2024', valor: 0 },
-          { name: 'Vendas acumuladas atual', valor: 0 },
-          { name: 'Meta de Vendas acumuladas', valor: 0 },
-          { name: 'Vendas 2024', valor: 0 },
-          { name: 'Meta total do mês', valor: 0 },
-          { name: 'Vendas do dia', valor: 0 },
-        ]);
-        break;
-    }
+    await _axios.get('/vendasAcumuladasMes', {
+        params: {
+          data: date,
+          filial: filial,
+        }
+      }).then(({ data }) => {
+        setVendasAcumuladasMesDoAnoAtual(data.data[0].VendasAcumuladasNoMes);
+      });
+    
+    await _axios.get('/vendasAcumuladasMes', {
+        params: {
+          data: date.replace(/^\d+/, (y: string) => String(Number(y) - 1)),
+          filial: filial,
+        }
+      }).then(({ data }) => {
+        const vendasAcumuladas = data.data[0].VendasAcumuladasNoMes;
+        setVendasAcumuladasMesDoAnoPassado(vendasAcumuladas);
+        setMetaMes(vendasAcumuladas + vendasAcumuladas * 0.05);
+      });
+
+    await _axios.get('/vendasMesFilial', {
+        params: {
+          data: date.replace(/^\d+/, (y: string) => String(Number(y) - 1)),
+          filial: filial,
+        }
+      }).then(({ data }) => {
+        const vendasMes = data.data[0].VendasTotaisMes;
+        setVendasMesAnoPassado(vendasMes);
+      });
+
+    setChartData([
+      { name: `Vendas acumuladas ${anoAtual - 1}`, valor: vendasAcumuladasMesDoAnoPassado },
+      { name: 'Vendas acumuladas atual', valor: vendasAcumuladasMesDoAnoAtual },
+      { name: 'Meta de Vendas acumuladas', valor: metaMes },
+      { name: `Vendas totais do mês em ${anoAtual - 1}`, valor: vendasMesAnoPassado },
+      { name: 'Meta total do mês', valor: 0 },
+    ]);
+  }
+
+  // Função para mudar os dados do gráfico conforme a filial
+  const handleFilial1Change = (option: any) => {
+    const filial = option.value;
+    setFilialG1(filial);
+    setChartData1(mes, filial); 
+  };
+
+  const handleMonthChange = (option: any) => {
+    const mes = option.value;
+    setMes(mes);
+    setChartData1(mes, filialG1);
+  };
+
+  const getDadosCrescimento = async (filial: string) => {
+    _axios.get('/crescimentoMensalPorFilialData', {
+        params: {
+          filial: filial
+        }
+      }).then(({ data }) => {
+        let dadosCrescimento = [];
+
+        for (let row of data.data) {
+          dadosCrescimento.push({ month: row.MesAno, crescimento: row.TaxaCrescimento });
+        }
+        setCrescimento(dadosCrescimento);
+      });
+  };
+  
+  const handleFilial2Change = (option: any) => {
+    setFilialG2(option.value);
+    getDadosCrescimento(option.value);
   };
 
   return (
@@ -131,20 +198,21 @@ export default function Dashboards() {
                 <p className="text-[20px]">Análise mensal</p>
               </div>
               <div className="w-[240px]">
-
                 <SelectInput
+                  id="nomeFilial-grafico1"
                   isSearchable={false}
-                  options={optionsFiliais}
+                  options={optionsFiliaisTeste}
                   label="Filiais"
-                  onChange={handleFilialChange}
+                  onChange={handleFilial1Change}
                 />
               </div>
               <div className="w-[240px]">
-
                 <SelectInput
+                  id="date"
                   isSearchable={false}
-                  options={optionsMes}
-                  label="Selecione a Data"
+                  options={optionsMeses}
+                  label="Mês"
+                  onChange={handleMonthChange}
                 />
               </div>
             </div>
@@ -159,17 +227,17 @@ export default function Dashboards() {
                 <p className="text-[20px]">Crescimento em relação ao mesmo mês do ano anterior</p>
               </div>
               <div className="w-[240px]">
-
                 <SelectInput
-                  isSearchable={false}
-                  options={optionsFiliais}
+                  isSearchable={false} 
+                  options={optionsFiliaisTeste}
                   label="Selecione a Filial"
+                  onChange={handleFilial2Change}
                 />
               </div>
             </div>
 
             <div>
-              <GraficoProg/>
+              <GraficoProg chartData={crescimento} />
             </div>
           </div>
         </div>
