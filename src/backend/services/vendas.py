@@ -5,7 +5,7 @@ from infra import cursor
 
 class VendasService:
     def get_filiais(self):
-        query = "SELECT DISTINCT nmFilial as Nome FROM dbproinfo.dbo.tbVendasDashboard;"
+        query = "SELECT DISTINCT nmFilial as Nome FROM dbproinfo.dbo.tbVendasDashboard ORDER BY nmFilial;"
         cursor.execute(query)
         return list(cursor)
 
@@ -32,17 +32,21 @@ class VendasService:
             FROM 
                 dbproinfo.dbo.tbVendasDashboard
             WHERE 
-                YEAR(dtVenda) = YEAR(%s)
+                nmFilial = %s
+                AND YEAR(dtVenda) = YEAR(%s)
                 AND MONTH(dtVenda) = MONTH(%s)
-                AND (%s IS NULL OR nmFilial = %s);
+            GROUP BY 
+                nmFilial,
+                YEAR(dtVenda),
+                MONTH(dtVenda);
         """
 
-        cursor.execute(query, (data, data, filial, filial))
+        cursor.execute(query, (filial, data, data))
 
         return list(cursor)
 
 
-    def get_vendas_acumuladas_mes(self, data):
+    def get_vendas_acumuladas_mes(self, data, filial):
         first_day = data.replace(day=1)
 
         query = """
@@ -51,10 +55,11 @@ class VendasService:
             FROM 
                 dbproinfo.dbo.tbVendasDashboard
             WHERE
-                dtVenda BETWEEN %s AND %s;
+                dtVenda BETWEEN %s AND %s
+                AND (%s IS NULL OR nmFilial = %s);
         """
 
-        cursor.execute(query, (first_day, data))
+        cursor.execute(query, (first_day, data, filial, filial))
         return list(cursor)
 
 

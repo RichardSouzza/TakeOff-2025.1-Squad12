@@ -44,8 +44,8 @@ def get_vendas_mes(data: date, filial: str = ""):
 
 
 @app.get("/vendasAcumuladasMes", summary="Obter vendas acumuladas de um mês até determinada data")
-def get_vendas_acumuladas_mes(data: date):
-    result = vendasService.get_vendas_acumuladas_mes(data)
+def get_vendas_acumuladas_mes(data: date, filial: str):
+    result = vendasService.get_vendas_acumuladas_mes(data, filial)
     return {"data": result}
 
 
