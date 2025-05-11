@@ -183,14 +183,30 @@ export default function Dashboards() {
           <div className="bg-white p-4 rounded-[4px] border border-[#600000]">
             <p className="text-[#600000] font-medium text-[32px]">Relatório</p>
             <p className="text-[#333333] font-medium">
-              Confira aqui os detalhes dos relatórios de vendas das filiais.
+              Confira aqui os detalhes dos relatórios de vendas das filiais de sua empresa.
             </p>
           </div>
         </div>
 
         <div className="bg-white flex flex-col p-4 gap-4">
-          <div>
-            <p>TODAS AS FILIAIS</p>
+        <SelectInput
+                id="nomeFilial-grafico1"
+                isSearchable={false}
+                options={optionsFiliaisTeste}
+                label="Selecione uma filial"
+                onChange={handleFilial1Change}
+                />
+          <div className="flex w-full gap-4">
+            <div className="flex flex-col gap-2 border p-4 w-1/2">
+              <p className="text-[20px]">Vendas totais do último dia com registro</p>
+              <p className="text-[20px]">(10/05/2025)</p>
+              <p className="text-[#4D0303] text-[32px]">R$18.000,83</p>
+            </div>
+            <div className="flex flex-col gap-2 border p-4 w-1/2">
+              <p className="text-[20px]">Venda totais do ano atual</p>
+              <p className="text-[20px]">(2025)</p>
+              <p className="text-[#4D0303] text-[32px]">R$200.000,83</p>
+            </div>
           </div>
           <div className="flex flex-col gap-[28px] border p-4">
             <div className="flex gap-[32px] justify-between">
