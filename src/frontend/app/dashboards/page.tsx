@@ -28,6 +28,9 @@ export default function Dashboards() {
   const [metaVendas, setMetaVendas] = useState<number>(0);
   const [vendasDataSelecionada, setVendasDataSelecionada] = useState<number>(0);
   const [crescimento, setCrescimento] = useState<any[]>([]);
+  const [vendaAnual, setVendaAnual] = useState(0);
+  const [filialGeral, setFilialGeral] = useState(0);
+
 
 
   const _axios = axios.create({
@@ -158,11 +161,37 @@ export default function Dashboards() {
         setCrescimento(dadosCrescimento);
       });
   };
+
+  const getDadosAnuais = async (filial: string, ano: Number) => {
+    _axios.get('/vendasTotaisAnoFilial', {
+        params: {
+          filial: filial,
+          ano: ano
+        }
+      }).then(({ data }) => {
+
+        setVendaAnual(data.data[0].VendasTotaisAno);
+        console.log(vendaAnual, "teste");
+        
+      });
+  };
+
+  const handleFilial3Change = (option: any) => {
+    setFilialGeral(option.value);
+    getDadosAnuais(option.value, 2025);
+  };
   
   const handleFilial2Change = (option: any) => {
     setFilialG2(option.value);
     getDadosCrescimento(option.value);
   };
+
+  function formatarParaBRL(valor:any) {
+    return valor.toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    });
+  }
 
   return (
     <div className="flex flex-col w-full h-full h-min-screen bg-[#F0F0F0]">
@@ -183,14 +212,30 @@ export default function Dashboards() {
           <div className="bg-white p-4 rounded-[4px] border border-[#600000]">
             <p className="text-[#600000] font-medium text-[32px]">Relatório</p>
             <p className="text-[#333333] font-medium">
-              Confira aqui os detalhes dos relatórios de vendas das filiais.
+              Confira aqui os detalhes dos relatórios de vendas das filiais de sua empresa.
             </p>
           </div>
         </div>
 
         <div className="bg-white flex flex-col p-4 gap-4">
-          <div>
-            <p>TODAS AS FILIAIS</p>
+        <SelectInput
+                id="nomeFilial-grafico3"
+                isSearchable={false}
+                options={optionsFiliaisTeste}
+                label="Selecione uma filial"
+                onChange={handleFilial3Change}
+                />
+          <div className="flex w-full gap-4">
+            <div className="flex flex-col gap-2 border p-4 w-1/2">
+              <p className="text-[20px]">Vendas totais do último dia com registro</p>
+              <p className="text-[20px]">(10/05/2025)</p>
+              <p className="text-[#4D0303] text-[32px]">{formatarParaBRL(vendaAnual)}</p>
+            </div>
+            <div className="flex flex-col gap-2 border p-4 w-1/2">
+              <p className="text-[20px]">Venda totais do ano atual</p>
+              <p className="text-[20px]">(2025)</p>
+              <p className="text-[#4D0303] text-[32px]">{formatarParaBRL(vendaAnual)}</p>
+            </div>
           </div>
           <div className="flex flex-col gap-[28px] border p-4">
             <div className="flex gap-[32px] justify-between">
