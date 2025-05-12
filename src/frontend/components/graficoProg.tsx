@@ -79,7 +79,13 @@ export function GraficoProg({ chartData }: GraficoProgProps) {
             />
             <ChartTooltip
               cursor={true}
-              content={<ChartTooltipContent hideLabel />}
+              content={
+                <ChartTooltipContent
+                className="font-semibold"
+                  hideLabel
+                  formatter={(value: any) => `Crescimento: ${value.toFixed(2).replace('.', ',')}%`}
+                />
+              }
             />
             <Line
               dataKey="crescimento"
