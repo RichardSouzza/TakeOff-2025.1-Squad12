@@ -1,7 +1,7 @@
 from os import getenv
 
+import pyodbc
 from dotenv import load_dotenv
-import pymssql
 
 
 load_dotenv()
@@ -11,13 +11,12 @@ DB_USER     = getenv("DB_USER") or ""
 DB_PASSWORD = getenv("DB_PASSWORD") or ""
 DB_NAME     = getenv("DB_NAME") or ""
 
-conn = pymssql.connect(
-    server=DB_HOST,
-    user=DB_USER,
-    password=DB_PASSWORD,
-    database=DB_NAME,
-    tds_version=r"7.0"
+conn_str = (
+    f"DRIVER={{ODBC Driver 17 for SQL Server}};"
+    f"SERVER={DB_HOST};"
+    f"DATABASE={DB_NAME};"
+    f"UID={DB_USER};"
+    f"PWD={DB_PASSWORD};"
+    "TrustServerCertificate=yes;"
 )
-
-cursor = conn.cursor(as_dict=True)
 
