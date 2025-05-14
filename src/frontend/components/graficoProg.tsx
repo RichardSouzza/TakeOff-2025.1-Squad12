@@ -52,7 +52,6 @@ const chartConfig = {
 } satisfies ChartConfig
 
 export function GraficoProg({ chartData }: GraficoProgProps) {
-  console.log(chartData);
   return (
     <Card className="flex justify-center">
       <CardHeader>

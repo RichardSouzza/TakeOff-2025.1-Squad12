@@ -54,14 +54,27 @@ interface SelectInputProps<Option, IsMulti extends boolean = false, Group extend
  * @param type Cor principal do Select.
  * 
  **/
-export function SelectInput<Option, IsMulti extends boolean = false, Group extends GroupBase<Option> = GroupBase<Option>>(props: SelectInputProps<Option, IsMulti, Group>) {
+export function SelectInput<
+  Option,
+  IsMulti extends boolean = false,
+  Group extends GroupBase<Option> = GroupBase<Option>
+>(
+  props: SelectInputProps<Option, IsMulti, Group>
+) {
   const [_document, _setDocument] = useState<any>(null);
-  const { label, isRequired, errorMessage, type = 'red', ...restProps } = props;
+  const {
+    label,
+    isRequired,
+    errorMessage,
+    type = 'red',
+    defaultValue = null,
+    ...restProps
+  } = props;
 
   const selectedColors = colorVariants[type];
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    if (typeof window !== 'undefined') {
       _setDocument(document.body);
     }
   }, []);
@@ -86,9 +99,10 @@ export function SelectInput<Option, IsMulti extends boolean = false, Group exten
         <>
           <Select
             instanceId="wsad123wqwe"
+            defaultValue={defaultValue}
             {...restProps}
-            noOptionsMessage={() => "Nenhuma opção encontrada"}
-            loadingMessage={() => "Carregando..."}
+            noOptionsMessage={() => 'Nenhuma opção encontrada'}
+            loadingMessage={() => 'Carregando...'}
             placeholder="Selecione..."
             theme={(theme) => ({
               ...theme,
@@ -102,24 +116,26 @@ export function SelectInput<Option, IsMulti extends boolean = false, Group exten
             })}
             menuPortalTarget={_document}
             styles={{
-                control: (baseStyles, state) => ({
-                    ...baseStyles,
-                    borderColor: errorMessage
-                      ? '#DC3545'
-                      : state.isFocused
-                      ? selectedColors.main
-                      : selectedColors.main,
-                    boxShadow: state.isFocused ? `0 0 0 2px ${selectedColors.main}40` : 'none',
-                    paddingLeft: '4px',
-                    paddingRight: '4px',
-                    cursor: 'pointer',
-                    fontWeight: 500,
-                    transition: 'all 0.2s ease',
-                    '&:hover': {
-                      borderColor: errorMessage ? '#DC3545' : `${selectedColors.main}`,
-                      boxShadow: `0 0 0 2px ${selectedColors.main}40`,
-                    },
-                  }),
+              control: (baseStyles, state) => ({
+                ...baseStyles,
+                borderColor: errorMessage
+                  ? '#DC3545'
+                  : state.isFocused
+                  ? selectedColors.main
+                  : selectedColors.main,
+                boxShadow: state.isFocused
+                  ? `0 0 0 2px ${selectedColors.main}40`
+                  : 'none',
+                paddingLeft: '4px',
+                paddingRight: '4px',
+                cursor: 'pointer',
+                fontWeight: 500,
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  borderColor: errorMessage ? '#DC3545' : `${selectedColors.main}`,
+                  boxShadow: `0 0 0 2px ${selectedColors.main}40`,
+                },
+              }),
               menu: (base) => ({
                 ...base,
                 borderRadius: '4px',
@@ -169,7 +185,7 @@ export function SelectInput<Option, IsMulti extends boolean = false, Group exten
 
           {errorMessage && (
             <div className="flex items-center gap-1 pt-1">
-              <FaExclamationCircle className="h-4 w-4 text-red-500"/>
+              <FaExclamationCircle className="h-4 w-4 text-red-500" />
               <h2 className="text-xs text-red-500 text-wrap">{errorMessage}</h2>
             </div>
           )}
@@ -178,3 +194,4 @@ export function SelectInput<Option, IsMulti extends boolean = false, Group exten
     </div>
   );
 }
+
