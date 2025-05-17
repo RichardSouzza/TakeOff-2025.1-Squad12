@@ -2,76 +2,72 @@
 
 import { Logos } from "@/components/logos";
 import Image from "next/image";
-import axios from "axios";
 import { IoLogoInstagram } from "react-icons/io";
 import { FaFacebookSquare, FaLinkedin } from "react-icons/fa";
+import * as api from "@/api/dashboard";
 import { SelectInput } from "@/components/selectInput";
 import { BarChartExample } from "@/components/graficoBarra";
 import { useEffect, useMemo, useState } from "react";
 import { GraficoProg } from "@/components/graficoProg";
 
+
+const optionsMeses = [
+  {
+    value: '01',
+    label: 'Janeiro',
+  },
+  {
+    value: '02',
+    label: 'Fevereiro',
+  },
+  {
+    value: '03',
+    label: 'Março',
+  },
+  {
+    value: '04',
+    label: 'Abril',
+  },
+];
+
 export default function Dashboards() {
+  const [filial, setFilial] = useState<any>("");
   const [filiais, setFiliais] = useState<any[]>([]);
-  const [filial, setFilial] = useState<any>("FILIAL RECIFE");
   const [selectedFilial, setSelectedFilial] = useState<any>(null);
   
   const dataAtual = new Date();
   const anoAtual = dataAtual.getFullYear();
-  const diaAtual = String(dataAtual.getDate()).padStart(2, '0');;
   const [mes, setMes] = useState<string>("");
   
   // Dados dos gráficos 
-  const [vendasAcumuladasMesDoAnoAtual, setVendasAcumuladasMesDoAnoAtual] = useState<number>(0);
-  const [vendasAcumuladasMesDoAnoPassado, setVendasAcumuladasMesDoAnoPassado] = useState<number>(0);
-  const [metaMes, setMetaMes] = useState<number>(0);
-  const [vendasMesAnoPassado, setVendasMesAnoPassado] = useState<number>(0);
-  const [vendasMesAnoAtual, setVendasMesAnoAtual] = useState<number>(0);
-  const [vendasTotaisAnoAtual, setVendasTotaisAnoAtual] = useState<number>(0);
-  const [metaVendas, setMetaVendas] = useState<number>(0);
-  const [vendasUltimaDataComRegistro, setVendasUltimaDataComRegistro] = useState<number>(0);
   const [ultimaDataComRegistro, setUltimaDataComRegistro] = useState<string>("");
+  const [vendasUltimaDataComRegistro, setVendasUltimaDataComRegistro] = useState<number>(0);
+  const [vendasTotaisAnoAtual, setVendasTotaisAnoAtual] = useState<number>(0);
+
+  const [vendasMesAnoPassado, setVendasMesAnoPassado] = useState<number>(0);
+  const [vendasAcumuladasMesDoAnoPassado, setVendasAcumuladasMesDoAnoPassado] = useState<number>(0);
+  const [vendasAcumuladasMesDoAnoAtual, setVendasAcumuladasMesDoAnoAtual] = useState<number>(0);
+  const [metaMesAcumulado, setMetaMes] = useState<number>(0);
+  const [vendasMesAnoAtual, setVendasMesAnoAtual] = useState<number>(0);
+  const [metaVendas, setMetaVendas] = useState<number>(0);
   const [previsaoMes, setPrevisaoMes] = useState<number>(0);
   const [crescimento, setCrescimento] = useState<any[]>([]);
   const [vendaAnual, setVendaAnual] = useState(0);
 
-  const _axios = axios.create({
-    baseURL: "http://localhost:8000",
-    headers: {"Access-Control-Allow-Origin": "http://localhost:8000"},
-    timeout: 10000,
-  });
-
-  useEffect(() => {
-    const validateDataRequest = async () => {
-      try {
-        const response = await _axios.get("/filiais");
-        setFiliais(response.data.data);
-      } catch (error) {}
-    };
+  const [chartData1, setChartData1] = useState([
+    { name: `Vendas totais do mês em ${anoAtual - 1}`, valor: 0 },
+    { name: `Vendas acumuladas do mês em ${anoAtual - 1}`, valor: 0 },
+    { name: 'Meta de vendas acumuladas', valor: 0 },
+    { name: 'Vendas acumuladas atual', valor: 0 },
+    { name: 'Meta total do mês', valor: 0 },
+    { name: 'Previsão mensal', valor: 0 },
+  ]);
   
-    validateDataRequest();
-  }, []);
-
-  useEffect(() => {
-    if (selectedFilial?.value != null) {
-    _axios.get('/vendasUltimoDiaComRegistro', {
-      params: {
-        filial: selectedFilial?.value,
-      }
-    }).then(({ data }) => {
-      const ultimaDataComRegistro = data.data[0].UltimaDataComRegistro;
-      const vendasUltimoDiaComRegistro = data.data[0].TotalDeVendas;
-      const previsao = projetarVendas(ultimaDataComRegistro, vendasUltimoDiaComRegistro);
-      // const vendasTotaisAnoAtual = getVendasTotaisAnoAtual(ultimaDataComRegistro, selectedFilial?.value);
-
-      getVendasTotaisAnoAtual(ultimaDataComRegistro, selectedFilial?.value);
-      setUltimaDataComRegistro(ultimaDataComRegistro);
-      setVendasUltimaDataComRegistro(vendasUltimoDiaComRegistro);
-      // getVendasTotaisAnoAtual(vendasTotaisAnoAtual);
-      setPrevisaoMes(previsao);
-      setNewChartData1(ultimaDataComRegistro);
-    });
-    } 
-  }, [selectedFilial]);
+  const [chartData2, setChartData2] = useState([
+    { name: `Vendas totais do mês em ${anoAtual - 1}`, valor: 0 },
+    { name: 'Meta total do mês', valor: 0 },
+    { name: `Vendas totais do mês em ${anoAtual}`, valor: 0 },
+  ]);
 
   const optionsFiliais = useMemo(() => {
     return Array.isArray(filiais)
@@ -82,36 +78,122 @@ export default function Dashboards() {
       : [];
   }, [filiais]);
 
+
+  
+  // Carregar filiais ao acessar a página
+  useEffect(() => {
+    const getFiliais = async () => {
+        setFiliais(await api.getFiliais());
+    };
+    getFiliais();
+  }, []);
+
+  const getVendasUltimo = async (filial: string) => {
+    const vendasUltimo = await api.getVendasUltimoDiaComRegistro(filial);
+    const ultimaDataComRegistro = vendasUltimo.UltimaDataComRegistro;
+    const vendasUltimoDiaComRegistro = vendasUltimo.TotalDeVendas;
+    const vendasTotaisAnoAtual = await api.getVendasTotaisAnoAtual(ultimaDataComRegistro, filial);
+
+    setUltimaDataComRegistro(ultimaDataComRegistro);
+    setVendasUltimaDataComRegistro(vendasUltimoDiaComRegistro);
+    setVendasTotaisAnoAtual(vendasTotaisAnoAtual);
+    setNewChartData1(ultimaDataComRegistro, filial);
+    setChartDataCrescimento(filial);
+  };
+
   useEffect(() => {
     if (optionsFiliais.length > 0) {
-      setSelectedFilial(optionsFiliais[0]);
-      setFilial(optionsFiliais[0].value);
+      const filial = optionsFiliais[0];
+      setSelectedFilial(filial);
+      setFilial(filial.value);
+      
+      // Carregar cards ao acessar a página
+      getVendasUltimo(filial.value);
     }
   }, [optionsFiliais]);
 
-  const optionsMeses = [
-    {
-      value: '01',
-      label: 'Janeiro',
-    },
-    {
-      value: '02',
-      label: 'Fevereiro',
-    },
-    {
-      value: '03',
-      label: 'Março',
-    },
-    {
-      value: '04',
-      label: 'Abril',
-    },
-    {
-      value: '05',
-      label: 'Maio',
-    },
-  ];
 
+
+  // Handlers
+  const handleFilialChange = (option: any) => {
+    const filial = option.value;
+    setFilial(filial);
+    setSelectedFilial(option);
+
+    getVendasUltimo(filial);
+    setChartDataCrescimento(filial);
+  };
+
+  const handleMonthChange = (option: any) => {
+    const mes = option.value;
+    setMes(mes);
+    setNewChartData2(`${anoAtual}-${mes}-01`, filial);
+  };
+
+
+
+  // Atualizar primeiro gráfico
+  const setNewChartData1 = async (date: string, filial: string) => {
+    if (filial != null) {
+      const vendasMesAnoPassado = await api.getVendasMesAnoPassado(date, filial);
+      const vendasAcumuladasMesDoAnoPassado = await api.getVendasAcumuladasMesDoAnoPassado(date, filial);
+      const metaMesAcumulado = vendasAcumuladasMesDoAnoPassado + vendasAcumuladasMesDoAnoPassado * 0.05;
+      const vendasAcumuladasMesDoAnoAtual = await api.getVendasAcumuladasMesDoAnoAtual(date, filial);
+      const metaVendas = vendasAcumuladasMesDoAnoAtual + vendasAcumuladasMesDoAnoAtual * 0.05;
+      const previsaoMes = projetarVendas(date, vendasAcumuladasMesDoAnoAtual);
+
+      setVendasMesAnoPassado(vendasMesAnoPassado);
+      setVendasAcumuladasMesDoAnoPassado(vendasAcumuladasMesDoAnoPassado);
+      setMetaMes(metaMesAcumulado);
+      setVendasAcumuladasMesDoAnoAtual(vendasAcumuladasMesDoAnoAtual);
+      setMetaVendas(metaVendas);
+
+      setChartData1([
+        { name: `Vendas totais do mês em ${anoAtual - 1}`, valor: vendasMesAnoPassado },
+        { name: `Vendas acumuladas do mês em ${anoAtual - 1}`, valor: vendasAcumuladasMesDoAnoPassado },
+        { name: 'Meta de vendas acumuladas', valor: metaMesAcumulado },
+        { name: 'Vendas acumuladas atual', valor: vendasAcumuladasMesDoAnoAtual },
+        { name: 'Meta total do mês', valor: metaVendas },
+        { name: 'Previsão mensal', valor: previsaoMes },
+      ]);
+    }
+  };
+
+
+
+  // Atualizar segundo gráfico
+  const setNewChartData2 = async (date: string, filial: string) => {
+    const vendasMesAnoPassado = await api.getVendasMesAnoPassado(date, filial);
+    const vendasMesAnoAtual = await api.getVendasMesAnoAtual(date, filial);
+    const metaVendas = vendasMesAnoPassado + vendasMesAnoPassado * 0.05;
+
+    setVendasMesAnoPassado(vendasMesAnoPassado);
+    setVendasMesAnoAtual(vendasMesAnoAtual)
+    setMetaVendas(metaVendas);
+
+    setChartData2([
+      { name: `Vendas totais do mês em ${anoAtual - 1}`, valor: vendasMesAnoPassado },
+      { name: 'Meta total do mês', valor: metaVendas },
+      { name: `Vendas totais do mês em ${anoAtual}`, valor: vendasMesAnoAtual },
+    ]);
+  };
+
+  
+
+  // Atualizar terceiro gráfico
+  const setChartDataCrescimento = async (filial: string) => {
+    const dadosCrescimento = await api.getCrescimentoMensalPorFilialData(filial);
+
+    let crescimentoMensal: any = [];
+    for (let row of dadosCrescimento) {
+      crescimentoMensal.push({ month: row.MesAno, crescimento: row.TaxaCrescimento });
+    }
+    setCrescimento(crescimentoMensal);
+  };
+  
+  
+
+  // Métodos auxiliares
   const projetarVendas = (dataUltimoDiaComRegistro: string, vendasAcumuladas: number) => {
     const data = new Date(dataUltimoDiaComRegistro);
     const diaDoMes = data.getDate();
@@ -121,142 +203,6 @@ export default function Dashboards() {
 
     return Math.round(projecaoFinal);
   }
-  
-  // Estado para armazenar os dados do gráfico
-  const [chartData1, setChartData1] = useState([
-    { name: `Vendas totais do mês em ${anoAtual - 1}`, valor: 0 },
-    { name: `Vendas acumuladas ${anoAtual - 1}`, valor: 0 },
-    { name: 'Meta de Vendas acumuladas', valor: 0 },
-    { name: 'Vendas acumuladas atual', valor: 0 },
-    { name: 'Meta total do mês', valor: 0 },
-    { name: 'Previsão Mensal', valor: 0 },
-  ]);
-  
-  const [chartData2, setChartData2] = useState([
-    { name: `Vendas totais do mês em ${anoAtual - 1}`, valor: 0 },
-    { name: `Vendas totais do mês em ${anoAtual}`, valor: 0 },
-    { name: 'Meta total do mês', valor: 0 },
-  ]);
-
-  // Função para mudar os dados do gráfico conforme a filial
-  const handleFilialChange = (option: any) => {
-    const filial = option.value;
-    setFilial(filial);
-    setNewChartData1(ultimaDataComRegistro); 
-    setChartDataCrescimento(filial);
-  };
-
-  const handleMonthChange = (option: any) => {
-    const mes = option.value;
-    setMes(mes);
-    setNewChartData2(mes, filial);
-  };
-
-  const getVendasAcumuladasMesDoAnoAtual = async (date: string, filial: string) => {
-    await _axios.get('/vendasAcumuladasMes', {
-        params: {
-          data: date,
-          filial: filial,
-        }
-    }).then(({ data }) => {
-        setVendasAcumuladasMesDoAnoAtual(data.data[0].VendasAcumuladasNoMes);
-    });
-  };
-  
-  const getVendasAcumuladasMesDoAnoPassado = async (date: string, filial: string) => {
-    await _axios.get('/vendasAcumuladasMes', {
-        params: {
-          data: date.replace(/^\d+/, (y: string) => String(Number(y) - 1)),
-          filial: filial,
-        }
-    }).then(({ data }) => {
-        const vendasAcumuladas = data.data[0].VendasAcumuladasNoMes;
-        setVendasAcumuladasMesDoAnoPassado(vendasAcumuladas);
-        setMetaMes(vendasAcumuladas + vendasAcumuladas * 0.05);
-    });
-  };
-  
-  const getVendasMesAnoPassado = async (date: string, filial: string) => {
-    await _axios.get('/vendasMesFilial', {
-        params: {
-          data: date.replace(/^\d+/, (y: string) => String(Number(y) - 1)),
-          filial: filial,
-        }
-    }).then(({ data }) => {
-        const vendasMes = data.data[0].VendasTotaisMes;
-        setVendasMesAnoPassado(vendasMes);
-        setMetaVendas(vendasMes + vendasMes * 0.05);
-    });
-  };
-  
-  const getVendasMesAnoAtual = async (date: string, filial: string) => {
-    await _axios.get('/vendasMesFilial', {
-        params: {
-          data: date.replace(/^\d+/, (y: string) => String(Number(y))),
-          filial: filial,
-        }
-    }).then(({ data }) => {
-        const vendasMes = data.data[0].VendasTotaisMes;
-        setVendasMesAnoAtual(vendasMes);
-    });
-  };
-
-  const getVendasTotaisAnoAtual = async (date: string, filial: string) => {
-    await _axios.get('/vendasAcumuladasAno', {
-        params: {
-          data: date.replace(/^\d+/, (y: string) => String(Number(y))),
-          filial: filial,
-        }
-    }).then(({ data }) => {
-        const vendasTotais = data.data[0].VendasTotaisAno;
-        setVendasTotaisAnoAtual(vendasTotais);
-    });
-  };
-
-
-  const setNewChartData1 = async (date: string) => {
-    const filial = selectedFilial?.value;
-    
-    console.log(date);
-    if (filial != null) {
-      getVendasMesAnoPassado(date, filial);
-      getVendasAcumuladasMesDoAnoPassado(date, filial);
-      getVendasAcumuladasMesDoAnoAtual(date, filial);
-      getVendasMesAnoAtual(date, filial);
-    }
-
-    setChartData1([
-      { name: `Vendas totais do mês em ${anoAtual - 1}`, valor: vendasMesAnoPassado },
-      { name: `Vendas acumuladas ${anoAtual - 1}`, valor: vendasAcumuladasMesDoAnoPassado },
-      { name: 'Meta de Vendas acumuladas', valor: metaMes },
-      { name: 'Vendas acumuladas atual', valor: vendasAcumuladasMesDoAnoAtual },
-      { name: 'Meta total do mês', valor: metaVendas },
-      { name: 'Previsão Mensal', valor: previsaoMes },
-    ]);
-  };
-
-  const setNewChartData2 = async (filial: string, data: string) => {
-    setChartData2([
-      { name: `Vendas totais do mês em ${anoAtual - 1}`, valor: vendasMesAnoPassado },
-      { name: `Vendas totais do mês em ${anoAtual}`, valor: vendasMesAnoAtual },
-      { name: 'Meta total do mês', valor: metaVendas },
-    ]);
-  };
-
-  const setChartDataCrescimento = async (filial: string) => {
-    _axios.get('/crescimentoMensalPorFilialData', {
-      params: {
-        filial: filial
-      }
-    }).then(({ data }) => {
-      let dadosCrescimento = [];
-
-      for (let row of data.data) {
-        dadosCrescimento.push({ month: row.MesAno, crescimento: row.TaxaCrescimento });
-      }
-      setCrescimento(dadosCrescimento);
-    });
-  };
 
   function formatarParaBRL(valor: number) {
     return (valor != undefined)
@@ -267,6 +213,8 @@ export default function Dashboards() {
       : 'R$ 0,00';
   }
 
+
+  
   return (
     <div className="flex flex-col w-full h-full h-min-screen bg-[#F0F0F0]">
       <header className="bg-[#202124] py-[16px] px-[96px]">
@@ -299,9 +247,7 @@ export default function Dashboards() {
             value={selectedFilial}
             label="Selecione uma filial"
             onChange={(option: any) => {
-              setSelectedFilial(option);
-              setFilial(option?.value);
-              setChartDataCrescimento(filial);
+              handleFilialChange(option);
             }}
           />
           <div className="flex w-full gap-4">
