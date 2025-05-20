@@ -70,8 +70,14 @@ def get_vendas_totais_por_ano_filial(request: Request, ano: int, filial: str = "
     return {"data": result}
 
 
-@app.get("/crescimentoMensalPorFilialData", summary="Obter crescimento mensal por filial e data")
-def get_crescimento_mensal_por_filial_data(request: Request, filial: str, data: date = "2024-01-01"):
-    result = request.app.state.vendas_service.get_crescimento_mensal_por_filial_data(filial, data)
+@app.get("/crescimentoMensalTotalPorFilialData", summary="Obter crescimento de vendas mensais por filial e data")
+def get_crescimento_mensal_total_por_filial_data(request: Request, filial: str, data: date = "2025-05-01"):
+    result = request.app.state.vendas_service.get_crescimento_mensal_total_por_filial_data(filial, data)
+    return {"data": result}
+
+
+@app.get("/crescimentoMensalMetaPorFilialData", summary="Obter crescimento mensal em relação à meta por filial e data")
+def get_crescimento_mensal_meta_por_filial_data(request: Request, filial: str, data: date = "2025-05-01"):
+    result = request.app.state.vendas_service.get_crescimento_mensal_meta_por_filial_data(filial, data)
     return {"data": result}
 

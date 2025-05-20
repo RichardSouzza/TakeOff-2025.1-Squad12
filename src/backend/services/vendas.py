@@ -81,31 +81,91 @@ class VendasService:
         """
         return self.run_query(query, (ano, filial, filial))
 
-    def get_crescimento_mensal_por_filial_data(self, filial: str, data: date):
+    def get_crescimento_mensal_total_por_filial_data(self, filial: str, data: date):
         query = """
-            WITH VendasMensais AS (
-                SELECT YEAR(dtVenda) AS Ano,
-                       MONTH(dtVenda) AS Mes,
-                       nmFilial,
-                       SUM(vlVenda) AS TotalVendas
+            DECLARE @Filial AS varchar(50) = ?;
+            DECLARE @DataInicio AS date = '2025-01-01';
+            DECLARE @DataFim    AS date = ?;
+
+            WITH VendasAtuais AS (
+                SELECT
+                    CAST(CONVERT(char(6), dtVenda, 112) + '01' AS date) AS MesAno,
+                    SUM(vlVenda) AS TotalVendasMes
                 FROM dbproinfo.dbo.tbVendasDashboard
-                WHERE nmFilial = ?
-                  AND (YEAR(dtVenda) = 2024 OR YEAR(dtVenda) = 2025)
-                GROUP BY YEAR(dtVenda), MONTH(dtVenda), nmFilial
+                WHERE nmFilial = @Filial
+                  AND dtVenda >= @DataInicio
+                  AND dtVenda < @DataFim
+                GROUP BY CAST(CONVERT(char(6), dtVenda, 112) + '01' AS date)
+            ),
+
+            VendasAnoAnterior AS (
+                SELECT
+                    CAST(CONVERT(char(6), DATEADD(year, 1, dtVenda), 112) + '01' AS date) AS MesAno,
+                    SUM(vlVenda) AS TotalVendasMesAnoAnterior
+                FROM dbproinfo.dbo.tbVendasDashboard
+                WHERE nmFilial = @Filial
+                  AND dtVenda >= DATEADD(year, -1, @DataInicio)
+                  AND dtVenda < DATEADD(year, -1, @DataFim)
+                GROUP BY CAST(CONVERT(char(6), DATEADD(year, 1, dtVenda), 112) + '01' AS date)
             )
-            SELECT v25.nmFilial as Filial,
-                   RIGHT('0' + CAST(v25.Mes AS VARCHAR), 2) + '/' + CAST(v25.Ano AS VARCHAR) AS MesAno,
-                   v24.TotalVendas AS Vendas2024,
-                   v25.TotalVendas AS Vendas2025,
-                   (v25.TotalVendas - v24.TotalVendas) * 100.0 / NULLIF(v24.TotalVendas, 0) AS TaxaCrescimento
-            FROM VendasMensais v25
-            INNER JOIN VendasMensais v24
-                    ON v25.Mes = v24.Mes
-                   AND v25.nmFilial = v24.nmFilial
-                   AND v25.Ano = 2025
-                   AND v24.Ano = 2024
-            WHERE v25.Mes <= MONTH(GETDATE())
-            ORDER BY v25.Mes;
+
+            SELECT
+                VA.MesAno,
+                VA.TotalVendasMes,
+                VAA.TotalVendasMesAnoAnterior,
+
+                CASE
+                    WHEN VAA.TotalVendasMesAnoAnterior = 0 OR VAA.TotalVendasMesAnoAnterior IS NULL THEN NULL
+                    ELSE (VA.TotalVendasMes * 100.0) / VAA.TotalVendasMesAnoAnterior - 100.0
+                END AS DiferencaPercentual
+            FROM VendasAtuais VA
+            LEFT JOIN VendasAnoAnterior VAA ON VA.MesAno = VAA.MesAno
+            ORDER BY VA.MesAno;
         """
-        return self.run_query(query, (filial,))
+        return self.run_query(query, (filial, data))
+
+    def get_crescimento_mensal_meta_por_filial_data(self, filial: str, data: date):
+        query = """
+            DECLARE @Filial AS varchar(50) = ?;
+            DECLARE @DataInicio AS date = '2025-01-01';
+            DECLARE @DataFim    AS date = ?;
+
+            WITH VendasAtuais AS (
+                SELECT
+                    CAST(CONVERT(char(6), dtVenda, 112) + '01' AS date) AS MesAno,
+                    SUM(vlVenda) AS TotalVendasMes
+                FROM dbproinfo.dbo.tbVendasDashboard
+                WHERE nmFilial = @Filial
+                  AND dtVenda >= @DataInicio
+                  AND dtVenda < @DataFim
+                GROUP BY CAST(CONVERT(char(6), dtVenda, 112) + '01' AS date)
+            ),
+
+            VendasAnoAnterior AS (
+                SELECT
+                    CAST(CONVERT(char(6), DATEADD(year, 1, dtVenda), 112) + '01' AS date) AS MesAno,
+                    SUM(vlVenda) AS TotalVendasMesAnoAnterior
+                FROM dbproinfo.dbo.tbVendasDashboard
+                WHERE nmFilial = @Filial
+                  AND dtVenda >= DATEADD(year, -1, @DataInicio)
+                  AND dtVenda < DATEADD(year, -1, @DataFim)
+                GROUP BY CAST(CONVERT(char(6), DATEADD(year, 1, dtVenda), 112) + '01' AS date)
+            )
+
+            SELECT
+                VA.MesAno,
+                VA.TotalVendasMes,
+                VA.TotalVendasMes * 1.05 AS MetaVendasAtual,
+                VAA.TotalVendasMesAnoAnterior,
+                VAA.TotalVendasMesAnoAnterior * 1.05 AS MetaAnoAnterior,
+
+                CASE
+                    WHEN VAA.TotalVendasMesAnoAnterior * 1.05 = 0 OR VAA.TotalVendasMesAnoAnterior IS NULL THEN NULL
+                    ELSE (VA.TotalVendasMes * 100.0) / (VAA.TotalVendasMesAnoAnterior * 1.05) - 100.0
+                END AS DiferencaPercentual
+            FROM VendasAtuais VA
+            LEFT JOIN VendasAnoAnterior VAA ON VA.MesAno = VAA.MesAno
+            ORDER BY VA.MesAno;
+        """
+        return self.run_query(query, (filial, data))
 
