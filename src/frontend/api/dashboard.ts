@@ -68,11 +68,62 @@ export const getVendasUltimoDiaComRegistro = async (filial: string) => {
   };
 };
 
-export const getCrescimentoMensalPorFilialData = async (filial: string) => {
-  return await _axios.get('/crescimentoMensalPorFilialData', {
+
+
+interface CrescimentoMensalResponse {
+  data: CrescimentoMensalRaw[];
+}
+
+interface CrescimentoMensalRaw {
+  MesAno: string;
+  TotalVendasMes: number;
+  MetaVendasAtual?: number;
+  TotalVendasMesAnoAnterior: number;
+  MetaAnoAnterior?: number;
+  DiferencaPercentual: number;
+}
+
+interface CrescimentoMensalFormatado {
+  Data: string;
+  Valor: number;
+}
+
+
+const decrementarMes = (date: string) => new Date(new Date(date).setMonth(new Date(date).getMonth() - 1)).toISOString().slice(0, 10);
+
+
+export const getCrescimentoMensalTotalPorFilialData = async (
+  date: string,
+  filial: string
+): Promise<CrescimentoMensalFormatado[]> => {
+  const response = await _axios.get<CrescimentoMensalResponse>('/crescimentoMensalTotalPorFilialData', {
     params: {
+      data: decrementarMes(date),
       filial: filial
     }
-  }).then(response => response.data.data);
-}
+  });
+
+  return response.data.data.map((item): CrescimentoMensalFormatado => ({
+    Data: item.MesAno,
+    Valor: item.DiferencaPercentual
+  }));
+};
+
+
+export const getCrescimentoMensalMetaPorFilialData = async (
+  date: string,
+  filial: string
+): Promise<CrescimentoMensalFormatado[]> => {
+  const response = await _axios.get<CrescimentoMensalResponse>('/crescimentoMensalMetaPorFilialData', {
+    params: {
+      data: decrementarMes(date),
+      filial: filial
+    }
+  });
+
+  return response.data.data.map((item): CrescimentoMensalFormatado => ({
+    Data: item.MesAno,
+    Valor: item.DiferencaPercentual
+  }));
+};
 

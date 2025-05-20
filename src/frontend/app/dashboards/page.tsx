@@ -34,7 +34,8 @@ export default function Dashboards() {
   const [filial, setFilial] = useState<any>("");
   const [filiais, setFiliais] = useState<any[]>([]);
   const [selectedFilial, setSelectedFilial] = useState<any>(null);
-  
+  const [selectedMes, setSelectedMes] = useState<any>(optionsMeses.findLast(mes => mes));
+
   const dataAtual = new Date();
   const anoAtual = dataAtual.getFullYear();
   const [mes, setMes] = useState<string>("");
@@ -51,7 +52,9 @@ export default function Dashboards() {
   const [vendasMesAnoAtual, setVendasMesAnoAtual] = useState<number>(0);
   const [metaVendas, setMetaVendas] = useState<number>(0);
   const [previsaoMes, setPrevisaoMes] = useState<number>(0);
-  const [crescimento, setCrescimento] = useState<any[]>([]);
+  
+  const [crescimentoMensalTotal, setCrescimentoMensalTotal] = useState<any[]>([]);
+  const [crescimentoMensalMeta, setCrescimentoMensalMeta] = useState<any[]>([]);
   const [vendaAnual, setVendaAnual] = useState(0);
 
   const [chartData1, setChartData1] = useState([
@@ -83,7 +86,12 @@ export default function Dashboards() {
   // Carregar filiais ao acessar a página
   useEffect(() => {
     const getFiliais = async () => {
-        setFiliais(await api.getFiliais());
+      const filiais = await api.getFiliais();
+      const filial = filiais.findLast((f: any) => f).Nome;
+      setFiliais(filiais);
+
+      // Carregar segundo gŕafico
+      setNewChartData2(`${anoAtual}-${selectedMes.value}-01`, filial);
     };
     getFiliais();
   }, []);
@@ -98,7 +106,7 @@ export default function Dashboards() {
     setVendasUltimaDataComRegistro(vendasUltimoDiaComRegistro);
     setVendasTotaisAnoAtual(vendasTotaisAnoAtual);
     setNewChartData1(ultimaDataComRegistro, filial);
-    setChartDataCrescimento(filial);
+    setChartDataCrescimento(ultimaDataComRegistro, filial);
   };
 
   useEffect(() => {
@@ -121,12 +129,13 @@ export default function Dashboards() {
     setSelectedFilial(option);
 
     getVendasUltimo(filial);
-    setChartDataCrescimento(filial);
+    setChartDataCrescimento(ultimaDataComRegistro, filial);
   };
 
   const handleMonthChange = (option: any) => {
     const mes = option.value;
     setMes(mes);
+    setSelectedMes(option);
     setNewChartData2(`${anoAtual}-${mes}-01`, filial);
   };
 
@@ -139,7 +148,7 @@ export default function Dashboards() {
       const vendasAcumuladasMesDoAnoPassado = await api.getVendasAcumuladasMesDoAnoPassado(date, filial);
       const metaMesAcumulado = vendasAcumuladasMesDoAnoPassado + vendasAcumuladasMesDoAnoPassado * 0.05;
       const vendasAcumuladasMesDoAnoAtual = await api.getVendasAcumuladasMesDoAnoAtual(date, filial);
-      const metaVendas = vendasAcumuladasMesDoAnoAtual + vendasAcumuladasMesDoAnoAtual * 0.05;
+      const metaVendas = vendasMesAnoPassado + vendasAcumuladasMesDoAnoAtual * 0.05;
       const previsaoMes = projetarVendas(date, vendasAcumuladasMesDoAnoAtual);
 
       setVendasMesAnoPassado(vendasMesAnoPassado);
@@ -181,14 +190,12 @@ export default function Dashboards() {
   
 
   // Atualizar terceiro gráfico
-  const setChartDataCrescimento = async (filial: string) => {
-    const dadosCrescimento = await api.getCrescimentoMensalPorFilialData(filial);
+  const setChartDataCrescimento = async (date: string, filial: string) => {
+    const dadosCrescimentoMensalTotal = await api.getCrescimentoMensalTotalPorFilialData(date, filial);
+    const dadosCrescimentoMensalMeta = await api.getCrescimentoMensalMetaPorFilialData(date, filial);
 
-    let crescimentoMensal: any = [];
-    for (let row of dadosCrescimento) {
-      crescimentoMensal.push({ month: row.MesAno, crescimento: row.TaxaCrescimento });
-    }
-    setCrescimento(crescimentoMensal);
+    setCrescimentoMensalTotal(dadosCrescimentoMensalTotal);
+    setCrescimentoMensalMeta(dadosCrescimentoMensalMeta);
   };
   
   
@@ -285,6 +292,7 @@ export default function Dashboards() {
                   id="date"
                   isSearchable={false}
                   options={optionsMeses}
+                  value={selectedMes}
                   label="Mês"
                   onChange={handleMonthChange}
                 />
@@ -303,7 +311,7 @@ export default function Dashboards() {
             </div>
 
             <div>
-              <GraficoProg chartData={crescimento} />
+              <GraficoProg linha1={crescimentoMensalTotal} linha2={crescimentoMensalMeta} />
             </div>
           </div>
         </div>
