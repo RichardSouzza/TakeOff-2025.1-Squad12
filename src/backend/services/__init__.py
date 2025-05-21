@@ -1,2 +1,2 @@
-from .vendas import VendasService
+from .sales import VendasService
 

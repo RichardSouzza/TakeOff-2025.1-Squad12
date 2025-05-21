@@ -2,11 +2,11 @@ from datetime import date
 
 import pyodbc
 
-from infra.database import conn_str
+from backend.infrastructure.database import sql_connection_str
 
 class VendasService:
     def run_query(self, query: str, params: tuple = ()):
-        with pyodbc.connect(conn_str) as connection:
+        with pyodbc.connect(sql_connection_str) as connection:
             cursor = connection.cursor()
             cursor.execute(query, params)
             columns = [col[0] for col in cursor.description]
