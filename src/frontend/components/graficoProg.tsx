@@ -1,6 +1,7 @@
 "use client"
 
 import { CartesianGrid, Line, LineChart, XAxis } from "recharts"
+import { Legend } from "recharts";
 
 import {
   Card,
@@ -29,11 +30,11 @@ interface GraficoProgProps {
 
 const chartConfig = {
   linha1: {
-    label: "Linha 1",
+    label: "Crescimento em relação ao mesmo mês no ano passado",
     color: "#C30505", // vermelho
   },
   linha2: {
-    label: "Linha 2",
+    label: "Crescimento em relação à meta estabelecida",
     color: "#0572C3", // azul
   },
 } satisfies ChartConfig
@@ -94,6 +95,14 @@ export function GraficoProg({ linha1, linha2 }: GraficoProgProps) {
                 return date.toLocaleString("pt-BR", { month: "short" })
               }}
             />
+            <Legend
+              verticalAlign="top"
+              align="center"
+              wrapperStyle={{ paddingBottom: 20 }}
+              formatter={(value: string) =>
+                chartConfig[value as keyof typeof chartConfig].label
+              }
+            />
             <ChartTooltip
               cursor={true}
               content={
@@ -126,7 +135,7 @@ export function GraficoProg({ linha1, linha2 }: GraficoProgProps) {
         </ChartContainer>
       </CardContent>
       <CardFooter className="flex-col items-start gap-2 text-sm">
-        <p>Comparação de duas séries de crescimento.</p>
+        <p>Aqui você poderá verificar a taxa de crescimento de determinada filial</p>
       </CardFooter>
     </Card>
   )
