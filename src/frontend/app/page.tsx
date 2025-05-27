@@ -30,15 +30,13 @@ export default function Home() {
 
           <form onSubmit={handleSubmit(handleLogin)} className="space-y-4">
             <div>
-              <label className="block text-[16px] text-white mb-1">E-mail</label>
+              <label className="block text-[16px] text-white mb-1">Usuário</label>
               <input
-                {...register("email")}
-                type="email"
+                {...register("usuario")}
                 className="w-full text-white border border-white bg-transparent px-3 py-2 rounded focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                placeholder="exemplo@email.com"
               />
-              {errors.email && (
-                <p className="text-red-400 text-sm mt-1">{errors.email.message}</p>
+              {errors.usuario && (
+                <p className="text-red-400 text-sm mt-1">{errors.usuario.message}</p>
               )}
             </div>
 
