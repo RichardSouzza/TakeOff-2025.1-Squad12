@@ -12,7 +12,7 @@ import { ToastProvider, useToast } from "@/contexts";
 export const useHome = () => {
   const { register, handleSubmit, getValues, formState: { errors } } = useForm<LoginType>({
     defaultValues: {
-      email: "",
+      usuario: "",
       senha: "",
     },
     resolver: zodResolver(LoginSchema),
@@ -25,10 +25,10 @@ export const useHome = () => {
   const handleLogin = async () => {
     setIsLoading(true);
 
-    const { email, senha } = getValues();
+    const { usuario, senha } = getValues();
 
-    if (email === "teste@email.com" && senha === "123456") {
-      const dadosUsuario = { email, nome: "Usuário Teste" };
+    if (usuario === "teste@email.com" && senha === "123456") {
+      const dadosUsuario = { usuario, nome: "Usuário Teste" };
       setCookie("authMock", JSON.stringify(dadosUsuario));
 
         toastMessage("Login realizado com sucesso", "success");
