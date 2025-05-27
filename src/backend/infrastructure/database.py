@@ -1,7 +1,7 @@
 from os import getenv
 
 from dotenv import load_dotenv
-from sqlmodel import create_engine
+from sqlmodel import create_engine, Session
 
 
 load_dotenv()
@@ -26,6 +26,12 @@ sql_connection_str = (
     "TrustServerCertificate=yes;"
 )
 
-pg_connection_str = f"postgres://{PG_DB_USER}:{PG_DB_PASSWORD}@{PG_DB_HOST}{PG_DB_PORT}/{PG_DB_NAME}?sslmode=require"
+pg_connection_str = f"postgresql+psycopg2://{PG_DB_USER}:{PG_DB_PASSWORD}@{PG_DB_HOST}:{PG_DB_PORT}/{PG_DB_NAME}?sslmode=require"
 
-engine = create_engine(pg_connection_str)
+engine = create_engine(pg_connection_str, echo=True)
+
+
+def get_session():
+    with Session(engine) as session:
+        yield session
+
