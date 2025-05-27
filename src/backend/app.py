@@ -3,8 +3,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.routers import vendas_router
-from backend.services import VendasService
+from routers import auth_router, vendas_router
+from services import VendasService
 
 
 @asynccontextmanager
@@ -29,4 +29,5 @@ app.add_middleware(
 )
 
 
+app.include_router(auth_router)
 app.include_router(vendas_router)
