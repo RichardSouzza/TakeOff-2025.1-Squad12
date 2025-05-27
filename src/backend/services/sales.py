@@ -2,7 +2,8 @@ from datetime import date
 
 import pyodbc
 
-from backend.infrastructure.database import sql_connection_str
+from infrastructure.database import sql_connection_str
+
 
 class VendasService:
     def run_query(self, query: str, params: tuple = ()):
@@ -168,4 +169,3 @@ class VendasService:
             ORDER BY VA.MesAno;
         """
         return self.run_query(query, (filial, data))
-
