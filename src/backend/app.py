@@ -3,12 +3,13 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.routers import vendas_router
-from backend.services import VendasService
+from routers import auth_router, vendas_router
+from services import AuthenticationService, VendasService
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    app.state.auth_service = AuthenticationService()    
     app.state.vendas_service = VendasService()    
     yield
 
@@ -29,4 +30,5 @@ app.add_middleware(
 )
 
 
+app.include_router(auth_router)
 app.include_router(vendas_router)
