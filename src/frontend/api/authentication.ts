@@ -2,7 +2,7 @@ import axios from "axios";
 
 
 const _axios = axios.create({
-  baseURL: "http://localhost:8000/auth",
+  baseURL: "http://localhost:8000/api/auth",
   headers: { "Access-Control-Allow-Origin": "http://localhost:8000" },
   timeout: 10000,
 });

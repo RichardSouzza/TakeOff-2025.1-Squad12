@@ -3,7 +3,7 @@ from datetime import date
 from fastapi import APIRouter, Request
 
 
-router = APIRouter(prefix="/vendas", tags=["Vendas"])
+router = APIRouter(prefix="/api/vendas", tags=["Vendas"])
 
 
 @router.get("/filiais", summary="Obter todas as filiais")

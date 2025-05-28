@@ -9,7 +9,7 @@ from infrastructure.security import create_token
 from models import *
 
 
-router = APIRouter(tags=["Authentication"])
+router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 
 SessionDep = Annotated[Session, Depends(get_session)]
 

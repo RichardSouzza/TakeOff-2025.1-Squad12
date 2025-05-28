@@ -16,7 +16,6 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="API Atos Capital",
     lifespan=lifespan,
-    prefix="/api",
 )
 
 
