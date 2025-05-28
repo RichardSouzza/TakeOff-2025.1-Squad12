@@ -14,11 +14,7 @@ export const CadastroSchema = z.object({
   
   telefone: z
     .string({ required_error: "O telefone é obrigatório" })
-    .nonempty("O telefone não pode ser vazio")
-    .regex(
-      /^\(\d{2}\)\s\d{5}-\d{4}$/,
-      "O telefone deve estar no formato (99) 99999-9999"
-    ),
+    .nonempty("O telefone não pode ser vazio"),
   
   usuario: z
     .string({ required_error: "O usuário é obrigatório" })
