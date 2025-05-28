@@ -15,10 +15,14 @@ class User(SQLModel, table=True):
     fl_excluded: bool = Field(nullable=False, default=False)
 
 
-
 class UserCreate(SQLModel):
     name:     str
     username: str
     password: str
     phone:    Optional[str] = None
+
+
+class LoginForm(SQLModel):
+    username: str
+    password: str
 
