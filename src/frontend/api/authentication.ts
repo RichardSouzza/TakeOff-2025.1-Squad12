@@ -16,12 +16,28 @@ interface User {
 }
 
 
+interface LoginForm {
+  usuario: string,
+  senha: string,
+}
+
+
 export const createUser = async ({ usuario, nome, senha, telefone }: User) => {
   return await _axios.post('/signup', {
-      name: nome,
+    name: nome,
+    username: usuario,
+    password: senha,
+    phone: telefone,
+  }).then(response => response.data.data);
+};
+
+
+export const login = async ({ usuario, senha }: LoginForm) => {
+  return await _axios.get('/signin', {
+    params: {
       username: usuario,
       password: senha,
-      phone: telefone,
-  }).then(response => response.data.data);
+    }
+  }).then(response => response.data);
 };
 

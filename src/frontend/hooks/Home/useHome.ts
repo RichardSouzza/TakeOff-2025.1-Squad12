@@ -1,12 +1,13 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { LoginSchema, LoginType } from "./validations";
-import { useForm } from "react-hook-form";
-import { useState } from "react";
 import { setCookie } from "cookies-next";
 import { useRouter } from "next/navigation";
-import { ToastProvider, useToast } from "@/contexts";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import * as api from "@/api/authentication";
+import { useToast } from "@/contexts";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { LoginSchema, LoginType } from "./validations";
 
 
 export const useHome = () => {
@@ -27,19 +28,18 @@ export const useHome = () => {
 
     const { usuario, senha } = getValues();
 
-    if (usuario === "teste@email.com" && senha === "123456") {
-      const dadosUsuario = { usuario, nome: "Usuário Teste" };
-      setCookie("authMock", JSON.stringify(dadosUsuario));
+    const response = await api.login({usuario, senha});
 
-        toastMessage("Login realizado com sucesso", "success");
-
+    console.log(response);
+    if (response) {
+      setCookie("auth-token", JSON.stringify(response));
+      toastMessage("Login realizado com sucesso", "success");
       setTimeout(() => {
         router.push("/dashboards");
       }, 1500);
     } else {
-      toastMessage("Credenciais inválidas. Use teste@email.com / 123456", "error");
+      toastMessage("Usuário ou senha incorretos", "error");
     }
-
     setIsLoading(false);
   };
 

@@ -1,13 +1,12 @@
 "use client";
 
-import { setCookie } from "cookies-next";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import * as api from "@/api/authentication";
-import { ToastProvider, useToast } from "@/contexts";
+import { useToast } from "@/contexts";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CadastroSchema, CadastroType, LoginSchema, LoginType } from "./validations";
+import { CadastroSchema, CadastroType } from "./validations";
 
 
 export const useAdministrador = () => {
@@ -30,9 +29,6 @@ const { register, handleSubmit, getValues, formState: { errors } } = useForm<Cad
     setIsLoading(true);
 
     const { usuario, nome, telefone, senha } = getValues();
-
-    console.log(usuario, nome, telefone, senha)
-    console.log("Nossa, que senha difícil! :o")
 
     await api.createUser(
       { usuario, nome, telefone, senha }

@@ -5,7 +5,7 @@ export function middleware(request: NextRequest) {
   const auth = request.cookies.get("authMock");
 
   if (pathname.startsWith("/dashboards") && !auth) {
-    return NextResponse.redirect(new URL("/", request.url));
+    // return NextResponse.redirect(new URL("/", request.url));
   }
 console.log("teste",pathname);
 
