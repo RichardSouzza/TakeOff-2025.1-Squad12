@@ -9,7 +9,9 @@ import { SelectInput } from "@/components/selectInput";
 import { BarChartExample } from "@/components/graficoBarra";
 import { useEffect, useMemo, useState } from "react";
 import { GraficoProg } from "@/components/graficoProg";
-
+import { FaPersonWalkingLuggage } from "react-icons/fa6";
+import { useRouter } from 'next/navigation';
+import { useToast } from "@/contexts";
 
 const optionsMeses = [
   {
@@ -28,6 +30,10 @@ const optionsMeses = [
     value: '04',
     label: 'Abril',
   },
+  {
+    value: '05',
+    label: 'Maio',
+  },
 ];
 
 export default function Dashboards() {
@@ -35,7 +41,7 @@ export default function Dashboards() {
   const [filiais, setFiliais] = useState<any[]>([]);
   const [selectedFilial, setSelectedFilial] = useState<any>(null);
   const [selectedMes, setSelectedMes] = useState<any>(optionsMeses.findLast(mes => mes));
-
+  const router = useRouter();
   const dataAtual = new Date();
   const anoAtual = dataAtual.getFullYear();
   const [mes, setMes] = useState<string>("");
@@ -56,6 +62,9 @@ export default function Dashboards() {
   const [crescimentoMensalTotal, setCrescimentoMensalTotal] = useState<any[]>([]);
   const [crescimentoMensalMeta, setCrescimentoMensalMeta] = useState<any[]>([]);
   const [vendaAnual, setVendaAnual] = useState(0);
+
+  const {toastMessage} = useToast();
+  
 
   const [chartData1, setChartData1] = useState([
     { name: `Vendas totais do mês em ${anoAtual - 1}`, valor: 0 },
@@ -219,18 +228,26 @@ export default function Dashboards() {
       })
       : 'R$ 0,00';
   }
-
+  const logout = async () => {
+    toastMessage("Logout realizado com sucesso", "success");
+    setTimeout(() => {
+      router.push("/");
+    }, 1500);
+  };
 
   
   return (
     <div className="flex flex-col w-full h-full h-min-screen bg-[#F0F0F0]">
-      <header className="bg-[#202124] py-[16px] px-[96px]">
+      <header className="flex justify-between items-center bg-[#202124] py-[16px] px-[96px]">
         <Image
           src={Logos.logo_atos_branca}
           width={160}
           height={44}
           alt="Logo da ATOS"
         />
+        <button className="text-white rounded-[4px] hover:bg-gray-800 p-2 cursor-pointer" onClick={logout}>
+          <FaPersonWalkingLuggage className="h-[28px] w-[28px]"/>
+        </button>
       </header>
 
       <main className="flex flex-col gap-[32px] justify-start w-full my-[32px] px-[96px] flex-1">
@@ -306,7 +323,7 @@ export default function Dashboards() {
           <div className="flex flex-col gap-[28px] border p-4">
             <div className="flex gap-[32px] justify-between">
               <div>
-                <p className="text-[20px]">Crescimento em relação ao mesmo mês do ano anterior</p>
+                <p className="text-[20px]">Análise de crescimento da filial</p>
               </div>
             </div>
 
