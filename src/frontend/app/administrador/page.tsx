@@ -1,11 +1,12 @@
 "use client";
 
-import { Logos } from "@/components/logos";
 import Image from "next/image";
-import { IoLogoInstagram } from "react-icons/io";
 import { FaFacebookSquare, FaLinkedin } from "react-icons/fa";
-import { useHome } from "@/hooks/Home/useHome";
+import { IoLogoInstagram } from "react-icons/io";
+import { Logos } from "@/components/logos";
 import { useAdministrador } from "@/hooks/Home/useAdministrador";
+import { useHome } from "@/hooks/Home/useHome";
+
 
 export default function Home() {
   const { errors, handleCadastro, handleSubmit, isLoading, register } = useAdministrador();
@@ -48,7 +49,7 @@ export default function Home() {
             {...register("telefone")}
             type="text"
             className="w-full text-white border border-white bg-transparent px-3 py-2 rounded focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            placeholder="(99) 99999-9999"
+            placeholder="+5579987654321"
             />
             {errors.telefone && (
             <p className="text-red-400 text-sm mt-1">{errors.telefone.message}</p>
@@ -61,7 +62,7 @@ export default function Home() {
             {...register("usuario")}
             type="text"
             className="w-full text-white border border-white bg-transparent px-3 py-2 rounded focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            placeholder="exemplo@email.com"
+            placeholder="Usuario"
             />
             {errors.usuario && (
             <p className="text-red-400 text-sm mt-1">{errors.usuario.message}</p>

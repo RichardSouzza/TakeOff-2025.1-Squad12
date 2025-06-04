@@ -30,6 +30,10 @@ const optionsMeses = [
     value: '04',
     label: 'Abril',
   },
+  {
+    value: '05',
+    label: 'Maio',
+  },
 ];
 
 export default function Dashboards() {

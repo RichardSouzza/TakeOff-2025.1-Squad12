@@ -10,15 +10,15 @@ import { CadastroSchema, CadastroType } from "./validations";
 
 
 export const useAdministrador = () => {
-const { register, handleSubmit, getValues, formState: { errors } } = useForm<CadastroType>({
-  defaultValues: {
-    nome: "",
-    telefone: "",
-    usuario: "",
-    senha: "",
-  },
-  resolver: zodResolver(CadastroSchema),
-});
+  const { register, handleSubmit, getValues, formState: { errors } } = useForm<CadastroType>({
+    defaultValues: {
+      nome: "",
+      telefone: "",
+      usuario: "",
+      senha: "",
+    },
+    resolver: zodResolver(CadastroSchema),
+  });
 
 
   const router = useRouter();

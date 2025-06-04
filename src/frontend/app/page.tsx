@@ -5,7 +5,6 @@ import Image from "next/image";
 import { IoLogoInstagram } from "react-icons/io";
 import { FaFacebookSquare, FaLinkedin } from "react-icons/fa";
 import { useHome } from "@/hooks/Home/useHome";
-import { useEffect } from "react";
 
 export default function Home() {
   const { errors, handleLogin, handleSubmit, isLoading, register } = useHome();
