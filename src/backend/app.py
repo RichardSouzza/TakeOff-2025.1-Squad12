@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
-from routers import auth_router, vendas_router
+from routers import *
 from services import VendasService
 
 
@@ -30,3 +30,5 @@ app.add_middleware(
 
 app.include_router(auth_router)
 app.include_router(vendas_router)
+app.include_router(users_router)
+
