@@ -1,19 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 
+const publicRoutes = ["/", "/administrador"];
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const auth = request.cookies.get("authMock");
+  const auth = request.cookies.get("auth-token");
 
-  if (pathname.startsWith("/dashboards") && !auth) {
-    // return NextResponse.redirect(new URL("/", request.url));
-  }
-console.log("teste",pathname);
-
-  if (!pathname.startsWith("/dashboards")) {
-    const response = NextResponse.next();
-    response.cookies.delete("authMock");
-    return response;
+  if (publicRoutes.includes(pathname)) {
+    console.log("Permitir", pathname);
+    return NextResponse.next();
   }
 
-  return NextResponse.next();
+  else if (!auth) {
+    console.log("Bloquear", pathname)
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+}
+
+export const config = {
+  matcher: ["/((?!api|_next/static|_next/image|.*\\.svg|.*\\.png$).*)"],
 }
