@@ -2,9 +2,8 @@ import axios from "axios";
 
 
 const _axios = axios.create({
-  baseURL: "http://localhost:8000/api/auth",
-  headers: { "Access-Control-Allow-Origin": "http://localhost:8000" },
-  timeout: 10000,
+  baseURL: `${process.env.NEXT_PUBLIC_API_URL}/auth`,
+  timeout: 60000, // 60 seconds
 });
 
 
@@ -40,4 +39,3 @@ export const login = async ({ usuario, senha }: LoginForm) => {
     }
   }).then(response => response.data);
 };
-
