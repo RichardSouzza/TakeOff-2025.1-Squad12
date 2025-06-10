@@ -2,9 +2,8 @@ import axios from "axios";
 
 
 const _axios = axios.create({
-  baseURL: "http://localhost:8000/api/vendas",
-  headers: { "Access-Control-Allow-Origin": "http://localhost:8000" },
-  timeout: 10000,
+  baseURL: `${process.env.NEXT_PUBLIC_API_URL}/vendas`,
+  timeout: 60000, // 60 seconds
 });
 
 
@@ -75,12 +74,12 @@ interface CrescimentoMensalResponse {
 }
 
 interface CrescimentoMensalRaw {
-  MesAno: string;
-  TotalVendasMes: number;
-  MetaVendasAtual?: number;
+  Data: string;
   TotalVendasMesAnoAnterior: number;
-  MetaAnoAnterior?: number;
-  DiferencaPercentual: number;
+  TotalVendasMesAnoAtual: number;
+  CrescimentoPercentual: number;
+  MetaVendasAtual?: number;
+  MetaMesAnoAtual?: number;
 }
 
 interface CrescimentoMensalFormatado {
@@ -104,8 +103,8 @@ export const getCrescimentoMensalTotalPorFilialData = async (
   });
 
   return response.data.data.map((item): CrescimentoMensalFormatado => ({
-    Data: item.MesAno,
-    Valor: item.DiferencaPercentual
+    Data: item.Data,
+    Valor: item.CrescimentoPercentual
   }));
 };
 
@@ -122,8 +121,7 @@ export const getCrescimentoMensalMetaPorFilialData = async (
   });
 
   return response.data.data.map((item): CrescimentoMensalFormatado => ({
-    Data: item.MesAno,
-    Valor: item.DiferencaPercentual
+    Data: item.Data,
+    Valor: item.CrescimentoPercentual
   }));
 };
-

@@ -110,7 +110,7 @@ export function GraficoProg({ linha1, linha2 }: GraficoProgProps) {
                   className="font-semibold"
                   hideLabel
                   formatter={(value: any, name: any) =>
-                    `${chartConfig[name as keyof typeof chartConfig].label}: ${value.toFixed(2).replace('.', ',')}%`
+                    `${chartConfig[name as keyof typeof chartConfig].label}: ${parseFloat(value).toFixed(2).replace('.', ',')}%`
                   }
                 />
               }
@@ -140,4 +140,3 @@ export function GraficoProg({ linha1, linha2 }: GraficoProgProps) {
     </Card>
   )
 }
-

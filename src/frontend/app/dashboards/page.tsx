@@ -45,8 +45,8 @@ export default function Dashboards() {
   const dataAtual = new Date();
   const anoAtual = dataAtual.getFullYear();
   const [mes, setMes] = useState<string>("");
-  
-  // Dados dos gráficos 
+
+  // Dados dos gráficos
   const [ultimaDataComRegistro, setUltimaDataComRegistro] = useState<string>("");
   const [vendasUltimaDataComRegistro, setVendasUltimaDataComRegistro] = useState<number>(0);
   const [vendasTotaisAnoAtual, setVendasTotaisAnoAtual] = useState<number>(0);
@@ -58,23 +58,23 @@ export default function Dashboards() {
   const [vendasMesAnoAtual, setVendasMesAnoAtual] = useState<number>(0);
   const [metaVendas, setMetaVendas] = useState<number>(0);
   const [previsaoMes, setPrevisaoMes] = useState<number>(0);
-  
+
   const [crescimentoMensalTotal, setCrescimentoMensalTotal] = useState<any[]>([]);
   const [crescimentoMensalMeta, setCrescimentoMensalMeta] = useState<any[]>([]);
   const [vendaAnual, setVendaAnual] = useState(0);
 
   const {toastMessage} = useToast();
-  
+
 
   const [chartData1, setChartData1] = useState([
     { name: `Vendas totais do mês em ${anoAtual - 1}`, valor: 0 },
+    { name: 'Meta total do mês', valor: 0 },
+    { name: 'Previsão mensal', valor: 0 },
     { name: `Vendas acumuladas do mês em ${anoAtual - 1}`, valor: 0 },
     { name: 'Meta de vendas acumuladas', valor: 0 },
     { name: 'Vendas acumuladas atual', valor: 0 },
-    { name: 'Meta total do mês', valor: 0 },
-    { name: 'Previsão mensal', valor: 0 },
   ]);
-  
+
   const [chartData2, setChartData2] = useState([
     { name: `Vendas totais do mês em ${anoAtual - 1}`, valor: 0 },
     { name: 'Meta total do mês', valor: 0 },
@@ -91,7 +91,7 @@ export default function Dashboards() {
   }, [filiais]);
 
 
-  
+
   // Carregar filiais ao acessar a página
   useEffect(() => {
     const getFiliais = async () => {
@@ -123,7 +123,7 @@ export default function Dashboards() {
       const filial = optionsFiliais[0];
       setSelectedFilial(filial);
       setFilial(filial.value);
-      
+
       // Carregar cards ao acessar a página
       getVendasUltimo(filial.value);
     }
@@ -138,6 +138,7 @@ export default function Dashboards() {
     setSelectedFilial(option);
 
     getVendasUltimo(filial);
+    setNewChartData2(`${anoAtual}-${selectedMes.value}-01`, filial);
     setChartDataCrescimento(ultimaDataComRegistro, filial);
   };
 
@@ -168,11 +169,11 @@ export default function Dashboards() {
 
       setChartData1([
         { name: `Vendas totais do mês em ${anoAtual - 1}`, valor: vendasMesAnoPassado },
+        { name: 'Meta total do mês', valor: metaVendas },
+        { name: 'Previsão mensal', valor: previsaoMes },
         { name: `Vendas acumuladas do mês em ${anoAtual - 1}`, valor: vendasAcumuladasMesDoAnoPassado },
         { name: 'Meta de vendas acumuladas', valor: metaMesAcumulado },
         { name: 'Vendas acumuladas atual', valor: vendasAcumuladasMesDoAnoAtual },
-        { name: 'Meta total do mês', valor: metaVendas },
-        { name: 'Previsão mensal', valor: previsaoMes },
       ]);
     }
   };
@@ -196,7 +197,7 @@ export default function Dashboards() {
     ]);
   };
 
-  
+
 
   // Atualizar terceiro gráfico
   const setChartDataCrescimento = async (date: string, filial: string) => {
@@ -206,8 +207,8 @@ export default function Dashboards() {
     setCrescimentoMensalTotal(dadosCrescimentoMensalTotal);
     setCrescimentoMensalMeta(dadosCrescimentoMensalMeta);
   };
-  
-  
+
+
 
   // Métodos auxiliares
   const projetarVendas = (dataUltimoDiaComRegistro: string, vendasAcumuladas: number) => {
@@ -235,7 +236,7 @@ export default function Dashboards() {
     }, 1500);
   };
 
-  
+
   return (
     <div className="flex flex-col w-full h-full h-min-screen bg-[#F0F0F0]">
       <header className="flex justify-between items-center bg-[#202124] py-[16px] px-[96px]">
