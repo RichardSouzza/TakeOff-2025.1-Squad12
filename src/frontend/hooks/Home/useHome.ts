@@ -28,16 +28,17 @@ export const useHome = () => {
 
     const { usuario, senha } = getValues();
 
-    const response = await api.login({usuario, senha});
-
-    console.log(response);
-    if (response) {
-      setCookie("auth-token", JSON.stringify(response));
-      toastMessage("Login realizado com sucesso", "success");
-      setTimeout(() => {
-        router.push("/dashboards");
-      }, 1500);
-    } else {
+    try {
+      const response = await api.login({usuario, senha});
+      if (!response.isAxiosError) {
+        setCookie("auth-token", JSON.stringify(response));
+        toastMessage("Login realizado com sucesso", "success");
+        setTimeout(() => {
+          router.push("/dashboards");
+        }, 1500);
+      }
+    }
+    catch {
       toastMessage("Usuário ou senha incorretos", "error");
     }
     setIsLoading(false);

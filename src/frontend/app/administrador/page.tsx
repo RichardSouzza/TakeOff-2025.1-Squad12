@@ -49,7 +49,7 @@ export default function Home() {
             {...register("telefone")}
             type="text"
             className="w-full text-white border border-white bg-transparent px-3 py-2 rounded focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            placeholder="+5579987654321"
+            placeholder="+557987654321"
             />
             {errors.telefone && (
             <p className="text-red-400 text-sm mt-1">{errors.telefone.message}</p>
