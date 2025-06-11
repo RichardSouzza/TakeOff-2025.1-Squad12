@@ -5,7 +5,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlmodel import Session, select
 
 from infrastructure.database import get_session
-from infrastructure.security import create_token
+from infrastructure.security import create_token, encrypt_password, verify_password
 from models import *
 
 
@@ -17,6 +17,7 @@ SessionDep = Annotated[Session, Depends(get_session)]
 @router.post("/signup", summary="User signup")
 async def signup(request: Request, session: SessionDep, user: UserCreate):
     user = User.from_orm(user)
+    user.password = encrypt_password(user.password)
     session.add(user)
     session.commit()
     session.refresh(user)
@@ -24,10 +25,10 @@ async def signup(request: Request, session: SessionDep, user: UserCreate):
 
 
 @router.get("/signin", summary="User signin")
-async def signin(request: Request, session: SessionDep, form: Annotated[LoginForm, Depends()]): 
+async def signin(request: Request, session: SessionDep, form: Annotated[LoginForm, Depends()]):
     query = select(User) \
             .where(User.username == form.username and \
-                   User.password == form.password)
+                   verify_password(form.password, User.password))
 
     user = session.exec(query).first()
 
@@ -36,4 +37,3 @@ async def signin(request: Request, session: SessionDep, form: Annotated[LoginFor
         return token
 
     raise HTTPException(status_code=400, detail="Incorrect username or password")
-
