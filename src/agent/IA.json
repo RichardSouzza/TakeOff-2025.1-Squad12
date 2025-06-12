@@ -1,0 +1,446 @@
+{
+  "name": "IA",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "webhook",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "56d02d6a-6954-47ac-bdee-d0502b71e5d6",
+      "name": "Webhook",
+      "webhookId": "e64b4f1c-7968-44b9-944b-30bebe0f79ae"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3557f902-feae-47cf-9676-0af77e4d0023",
+              "name": "session",
+              "value": "={{ $json.body.session }}",
+              "type": "string"
+            },
+            {
+              "id": "e9df05c6-a843-4007-8cad-6e74e0c096a2",
+              "name": "chatid",
+              "value": "={{ $json.body.payload.from }}",
+              "type": "string"
+            },
+            {
+              "id": "e0b5ffa6-85f3-4105-9033-b518f3cbd399",
+              "name": "pushName",
+              "value": "={{ $json.body.payload._data.Info.PushName }}",
+              "type": "string"
+            },
+            {
+              "id": "4e7dbf64-6c4a-47a5-a8c3-c191e8d491e9",
+              "name": "payload_id",
+              "value": "={{ $json.body.payload.id }}",
+              "type": "string"
+            },
+            {
+              "id": "7ab86f03-eb6c-4898-aa4c-878df811e0f4",
+              "name": "event",
+              "value": "={{ $json.body.event }}",
+              "type": "string"
+            },
+            {
+              "id": "cd3a9d93-f151-446d-8fb1-99707759c990",
+              "name": "message",
+              "value": "={{ $json.body.payload.body }}",
+              "type": "string"
+            },
+            {
+              "id": "7df92e87-3d82-43d4-954f-eb6bfa9816c3",
+              "name": "fromMe",
+              "value": "={{ $json.body.payload.fromMe }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        220,
+        0
+      ],
+      "id": "95f6c454-21ad-4339-b56e-b7b4481a1930",
+      "name": "dados"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.event }}",
+                    "rightValue": "message",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "bbe39fef-2d9e-4691-bd36-db9bc5ce1d59"
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        480,
+        -20
+      ],
+      "id": "79c00804-6059-48e4-9686-16b4251f2f75",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message }}",
+        "options": {
+          "systemMessage": "Você é uma assistente virtual inteligente e objetiva, treinada para atender usuários via WhatsApp com foco em informações de vendas. Seu papel é responder de forma clara, rápida e direta às perguntas dos usuários com base nos dados mais recentes disponíveis. Entre as perguntas que você deve responder estão: “Qual loja vendeu mais hoje?”, “Qual o total de vendas no mês?” e “Qual a previsão de vendas para o mês?”. Sempre que possível, utilize linguagem simples e evite termos técnicos. Seu comportamento deve ser educado, profissional e eficiente, fornecendo informações precisas e relevantes, sem inventar dados. Caso alguma informação não esteja disponível, informe isso ao usuário de forma gentil."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        700,
+        -20
+      ],
+      "id": "1a951513-d71a-4731-ad8d-78d1ae99c878",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        740,
+        200
+      ],
+      "id": "e4abbfdd-e5f7-4d58-ac2d-3c01cac2557f",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "68pIr0Zfzs92NfAr",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('dados').item.json.chatid }}",
+        "sessionTTL": 3600,
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.5,
+      "position": [
+        900,
+        200
+      ],
+      "id": "8fe5e830-222f-42a2-905d-db4988f3512f",
+      "name": "Redis Chat Memory",
+      "credentials": {
+        "redis": {
+          "id": "z6x50uXwdYFMOy0X",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Send Seen",
+        "session": "={{ $('dados').item.json.session }}",
+        "chatId": "={{ $('dados').item.json.chatid }}",
+        "messageId": "={{ $('dados').item.json.payload_id }}",
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-waha.WAHA",
+      "typeVersion": 202411,
+      "position": [
+        1080,
+        -20
+      ],
+      "id": "ddcfe247-98b5-4b2d-85bc-cf512399046e",
+      "name": "WAHA",
+      "credentials": {
+        "wahaApi": {
+          "id": "WBd80jevBTNL0Agb",
+          "name": "WAHA account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Send Text",
+        "session": "={{ $('dados').item.json.session }}",
+        "chatId": "={{ $('dados').item.json.chatid }}",
+        "text": "={{ $('AI Agent').item.json.output }}",
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-waha.WAHA",
+      "typeVersion": 202411,
+      "position": [
+        1300,
+        -20
+      ],
+      "id": "ada42125-1a58-4468-9d49-52ffbcdf98e7",
+      "name": "WAHA1",
+      "credentials": {
+        "wahaApi": {
+          "id": "WBd80jevBTNL0Agb",
+          "name": "WAHA account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "accept": "application/json, text/plain, */*",
+            "content-type": "application/json",
+            "user-agent": "WAHA/2025.5.1",
+            "x-webhook-request-id": "01JV691DG2GRNTMBV7Q03F209N",
+            "x-webhook-timestamp": "1747188758006",
+            "content-length": "2064",
+            "accept-encoding": "gzip, compress, deflate, br",
+            "host": "host.docker.internal:5678",
+            "connection": "keep-alive"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "id": "evt_01jv691df9wx7c9z336kyjkxds",
+            "timestamp": 1747188758006,
+            "event": "message",
+            "session": "default",
+            "metadata": {},
+            "me": {
+              "id": "557991026006@c.us",
+              "pushName": "Davi",
+              "jid": "557991026006:85@s.whatsapp.net"
+            },
+            "payload": {
+              "id": "false_557998519195@c.us_3A6C88703017AC82157E",
+              "timestamp": 1747188757,
+              "from": "557998519195@c.us",
+              "fromMe": false,
+              "source": "app",
+              "body": "oi",
+              "to": null,
+              "participant": null,
+              "hasMedia": false,
+              "media": null,
+              "ack": 2,
+              "ackName": "DEVICE",
+              "replyTo": null,
+              "_data": {
+                "Info": {
+                  "Chat": "557998519195@s.whatsapp.net",
+                  "Sender": "557998519195@s.whatsapp.net",
+                  "IsFromMe": false,
+                  "IsGroup": false,
+                  "AddressingMode": "",
+                  "SenderAlt": "71335246078037@lid",
+                  "RecipientAlt": "",
+                  "BroadcastListOwner": "",
+                  "ID": "3A6C88703017AC82157E",
+                  "ServerID": 0,
+                  "Type": "text",
+                  "PushName": "Fernando",
+                  "Timestamp": "2025-05-14T02:12:37Z",
+                  "Category": "",
+                  "Multicast": false,
+                  "MediaType": "",
+                  "Edit": "",
+                  "MsgBotInfo": {
+                    "EditType": "",
+                    "EditTargetID": "",
+                    "EditSenderTimestampMS": "0001-01-01T00:00:00Z"
+                  },
+                  "MsgMetaInfo": {
+                    "TargetID": "",
+                    "TargetSender": "",
+                    "DeprecatedLIDSession": null,
+                    "ThreadMessageID": "",
+                    "ThreadMessageSenderJID": ""
+                  },
+                  "VerifiedName": null,
+                  "DeviceSentMeta": null
+                },
+                "Message": {
+                  "conversation": "oi",
+                  "messageContextInfo": {
+                    "deviceListMetadata": {
+                      "senderKeyHash": "6hOSL5F3d/z5wA==",
+                      "senderTimestamp": 1746832364,
+                      "recipientKeyHash": "Q6eHmJISt3ubqA==",
+                      "recipientTimestamp": 1747186792
+                    },
+                    "deviceListMetadataVersion": 2,
+                    "messageSecret": "gmEaMaks21tHeBPCV8jZcQ3YVbCcDvDQ/M9gSsDLNhY="
+                  }
+                },
+                "IsEphemeral": false,
+                "IsViewOnce": false,
+                "IsViewOnceV2": false,
+                "IsViewOnceV2Extension": false,
+                "IsDocumentWithCaption": false,
+                "IsLottieSticker": false,
+                "IsEdit": false,
+                "SourceWebMsg": null,
+                "UnavailableRequestID": "",
+                "RetryCount": 0,
+                "NewsletterMeta": null,
+                "RawMessage": {
+                  "conversation": "oi",
+                  "messageContextInfo": {
+                    "deviceListMetadata": {
+                      "senderKeyHash": "6hOSL5F3d/z5wA==",
+                      "senderTimestamp": 1746832364,
+                      "recipientKeyHash": "Q6eHmJISt3ubqA==",
+                      "recipientTimestamp": 1747186792
+                    },
+                    "deviceListMetadataVersion": 2,
+                    "messageSecret": "gmEaMaks21tHeBPCV8jZcQ3YVbCcDvDQ/M9gSsDLNhY="
+                  }
+                },
+                "Status": 3
+              }
+            },
+            "environment": {
+              "version": "2025.5.1",
+              "engine": "GOWS",
+              "tier": "CORE",
+              "browser": null
+            }
+          },
+          "webhookUrl": "http://host.docker.internal:5678/webhook-test/webhook",
+          "executionMode": "test"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "dados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "dados": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "WAHA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WAHA": {
+      "main": [
+        [
+          {
+            "node": "WAHA1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "51fb77b0-7f23-474c-97f5-6f1382d20a98",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "71510e4f61c3b83ade0ed4df28f0900dc1bef45de50ed1f4dfc38e269a0ef70c"
+  },
+  "id": "mWvd0abqBmWfShb9",
+  "tags": []
+}
